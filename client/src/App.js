@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3001/messages')
+    axios.get('http://localhost:3000/messages')
       .then(response => setMessages(response.data))
       .catch(error => console.error(error));
 
@@ -63,12 +63,12 @@ function App() {
   };
 
   const assignMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3001/messages/assign/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
   const lockMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3001/messages/lock/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
@@ -104,28 +104,29 @@ function App() {
         <div className="col-md-4">
           {/* Form for sending new messages */}
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label">Sender:</label>
-              <input
-                type="text"
-                className="form-control"
-                name="sender"
-                value={newMessage.sender}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Content:</label>
-              <input
-                type="text"
-                className="form-control"
-                name="content"
-                value={newMessage.content}
-                onChange={handleInputChange}
-              />
-            </div>
-            <button type="submit" className="btn btn-primary">Send Message</button>
-          </form>
+ <div className="mb-3">
+    <label className="form-label" htmlFor="sender">Sender:</label>
+    <input
+      type="text"
+      className="form-control"
+      id="sender"
+      name="sender"
+      value={newMessage.sender}
+      onChange={handleInputChange}
+    />
+ </div>
+ <div className="mb-3">
+    <label className="form-label">Content:</label>
+    <input
+      type="text"
+      className="form-control"
+      name="content"
+      value={newMessage.content}
+      onChange={handleInputChange}
+    />
+ </div>
+ <button type="submit" className="btn btn-primary">Send Message</button>
+</form>
         </div>
       </div>
     </div>
