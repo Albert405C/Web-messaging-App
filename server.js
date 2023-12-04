@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const parse = require('csv-parse');
+const csvParser = require('csv-parser');
 const fs = require('fs');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -52,7 +52,7 @@ const seedMessages = async () => {
  });
 
  fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")
-    .pipe(parse())
+    .pipe(parser())
     .on('data', (row) => {
       const newMessage = new Message({
         sender: row.sender,
