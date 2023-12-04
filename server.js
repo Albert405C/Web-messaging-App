@@ -44,30 +44,30 @@ io.on('connection', (socket) => {
 
 const seedMessages = async () => {
  const messages = [];
+ fs.writeFile('C:/Users/ADMIN/OneDrive/Desktop/Messaging Web App/UsersADMINOneDrive Documents/messages.csv', '', (err) => {
+  if (err) {
+    console.error('An error occurred while creating the file:', err);
+  } else {
+    console.log('File created successfully.');
+  }
+});
 
- fs.writeFile('C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDrive Documents\\messages.csv', '', (err) => {
-    if (err) {
-      console.error('An error occurred while creating the file:', err);
-    } else {
-      console.log('File created successfully.');
-    }
- });
-
- fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")
-    .pipe(csvParser())
-    .on('data', (row) => {
-      const newMessage = new Message({
-        sender: row.sender,
-        content: row.content,
-      });
-      messages.push(newMessage);
-    })
-    .on('end', async () => {
-      await Message.insertMany(messages);
+fs.createReadStream("C:/Users/ADMIN/OneDrive/Documents/messages.csv")
+  .pipe(csvParser())
+  .on('data', (row) => {
+    const newMessage = new Message({
+      sender: row.sender,
+      content: row.content,
     });
+    messages.push(newMessage);
+  })
+  .on('end', async () => {
+    await Message.insertMany(messages);
+  });
 };
 
 seedMessages();
+ 
 
 app.get('/messages', async (req, res) => {
  const messages = await Message.find();
