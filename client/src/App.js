@@ -104,17 +104,17 @@ function App() {
         <div className="col-md-4">
           {/* Form for sending new messages */}
           <form onSubmit={handleSubmit}>
- <div className="mb-3">
-    <label className="form-label" htmlFor="sender">Sender:</label>
-    <input
-      type="text"
-      className="form-control"
-      id="sender"
-      name="sender"
-      value={newMessage.sender}
-      onChange={handleInputChange}
-    />
- </div>
+          <div className="mb-3">
+ <label className="form-label" htmlFor="sender">Sender:</label>
+ <input
+    type="text"
+    className="form-control"
+    id="sender"
+    name="sender"
+    value={newMessage.sender}
+    onChange={handleInputChange}
+ />
+</div>
  <div className="mb-3">
     <label className="form-label">Content:</label>
     <input
