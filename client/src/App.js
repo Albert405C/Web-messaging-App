@@ -19,7 +19,8 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
+    axios.get('http://localhost:3000/messages_app')
+
       .then(response => {
         setMessages(response.data);
         setLoading(false);
@@ -29,21 +30,7 @@ function App() {
         setError('Error fetching messages');
         setLoading(false);
       });
- // Fetch CSV content from the server
- axios.get('http://localhost:3000/csv-content')
- .then(response => {
-   setCSVContent(response.data.csvContent);
- })
- .catch(error => {
-   console.error(error);
-   setError('Error fetching CSV content');
- });
 
-// Display CSV Content
-<h2 className="mt-4">CSV Content:</h2>
-{csvContent.map((line, index) => (
- <p key={index}>{line}</p>
-))}
     // Listen for 'messageAdded' events from the server
     socket.on('messageAdded', (newMessage) => {
       setMessages(prevMessages => [newMessage, ...prevMessages]);
@@ -79,7 +66,7 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3000/newMessage', { ...newMessage })
+    axios.post('http://localhost:3000', { ...newMessage })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ userId: '', messageBody: '' });

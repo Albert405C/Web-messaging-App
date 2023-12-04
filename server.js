@@ -3,14 +3,14 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
-const messageRouter = require('./messageRouter');
+const { parse } = require("csv-parse");
 const Message = require('./messageModel');
 const fs = require('fs');
 const csvParser = require('csv-parser');
 const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
-
+const messageRouter = require('./messageRouter.js');
 const server = http.createServer(app);
 app.use(cors({ origin: 'http://localhost:3001' }));
 const io = socketIo(server, {
@@ -34,7 +34,29 @@ app.use((req, res, next) => {
 mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
-
+  fs.createReadStream("./example.csv")
+  .pipe(parse({ delimiter: ",", from_line: 2 }))
+  .on("data", function (row) {
+    console.log(row);
+  })
+  .on("error", function (error) {
+    console.log(error.message);
+  })
+  .on("end", function () {
+    console.log("finished");
+  });
+  .on("data", function (row) {
+    // This will push the object row into the array
+    data.push(row);
+  })
+  .on("error", function (error) {
+    console.log(error.message);
+  })
+  .on("end", function () {
+    // Here log the result array
+    console.log("parsed csv data:");
+    console.log(data);
+  });
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
@@ -106,10 +128,7 @@ io.on('connection', (socket) => {
 app.get('/seed-messages', async (req, res) => {
   try {
     const seededMessages = await seedMessages();  // Assuming seedMessages returns the seeded messages
-
-    // Emit the 'seededMessages' event to connected clients
-    io.emit('seededMessages', seededMessages);
-
+    io.emit('seededMessages', seededMessages);  // Emit the 'seededMessages' event to connected clients
     res.json({ success: true, message: 'Messages seeded successfully' });
   } catch (error) {
     console.error('Error seeding messages:', error);
@@ -129,33 +148,6 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
-
-// Function to read CSV file and return an array of lines
-const readCSVFile = (filePath) => {
-  return new Promise((resolve, reject) => {
-    const lines = [];
-    fs.createReadStream(filePath)
-      .pipe(csvParser())
-      .on('data', (data) => lines.push(data))
-      .on('end', () => resolve(lines))
-      .on('error', (error) => reject(error));
-  });
-};
-
-// Use readCSVFile in your endpoint
-app.get('/csv-content', async (req, res) => {
-  try {
-    const csvContent = await readCSVFile('C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv');
-    res.json({ csvContent });
-  } catch (error) {
-    console.error('Error reading CSV file:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-
 
 // Use the routes from messageRouter
 app.use('/', messageRouter);
