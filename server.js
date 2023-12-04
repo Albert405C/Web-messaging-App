@@ -11,7 +11,7 @@ const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
-app.use(cors({ origin: 'http://localhost:3001' }));
+app.use(cors({ origin: 'http://localhost:3000' }));
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3001',
