@@ -21,7 +21,7 @@ app.use(cors({
 
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost/branch-messaging-app', {
+mongoose.connect('mongodb://localhost/Messaging-Web-App', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -51,7 +51,13 @@ io.on('connection', (socket) => {
 });
 const seedMessages = async () => {
   const messages = [];
-
+  fs.writeFile('C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDrive Documents\\messages.csv', '', (err) => {
+    if (err) {
+       console.error('An error occurred while creating the file:', err);
+    } else {
+       console.log('File created successfully.');
+    }
+   });
   // Assuming your CSV file is named 'yourfile.csv'
   fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")
     .pipe(parse())
