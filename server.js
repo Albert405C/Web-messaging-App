@@ -62,6 +62,9 @@ const seedMessages = async () => {
       }
     })
     .on('end', async () => {
+      const savedMessages = await Promise.all(messages.map(async (newMessage) => {
+        return await newMessage.save();
+      }));
       await Message.insertMany(messages);
       io.emit('seededMessages', messages);
     });
