@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const fs = require('fs');
+const parse = ('csv-parser');
 
 const app = express();
 const port = 3000;
@@ -38,7 +40,7 @@ const Message = mongoose.model('Message', messageSchema);
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:3001',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -47,16 +49,25 @@ const io = socketIo(server, {
 io.on('connection', (socket) => {
   console.log('Client connected');
 });
-
-// Simulate the presence of 50+ messages in the database
 const seedMessages = async () => {
-  for (let i = 1; i <= 50; i++) {
-    const newMessage = new Message({
-      sender: `Customer ${i}`,
-      content: `This is message number ${i}`,
+  const messages = [];
+
+  // Assuming your CSV file is named 'yourfile.csv'
+  fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")
+    .pipe(parse())
+    .on('data', (row) => {
+      // Create a new message based on the CSV row
+      const newMessage = new Message({
+        sender: row.sender,
+        content: row.content,
+        // Add other fields if needed
+      });
+      messages.push(newMessage);
+    })
+    .on('end', async () => {
+      // Save all messages to the MongoDB collection
+      await Message.insertMany(messages);
     });
-    await newMessage.save();
-  }
 };
 
 seedMessages();
