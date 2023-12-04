@@ -48,8 +48,9 @@ const seedMessages = async () => {
     .pipe(csvParser())
     .on('data', (row) => {
       // Check if the required columns exist in the row
-      if (row['_id'] && row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
+      if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
         const newMessage = new Message({
+          _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId
           customer_name: row['User ID'].toString(),
           customer_email: '', // You can leave customer_email empty or set it based on your data
           message: row['Message Body'],
@@ -61,11 +62,13 @@ const seedMessages = async () => {
       }
     })
     .on('end', async () => {
-      await Message.insertMany(messages);
-      io.emit('seededMessages', messages);
+      const savedMessages = await Promise.all(messages.map(async (newMessage) => {
+        return await newMessage.save();
+      }));
+      await Message.insertMany(savedMessages);
+      io.emit('seededMessages', savedMessages);
     });
 };
-
 
 seedMessages();
 
