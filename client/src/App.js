@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
+import io  from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const socket = io('http://localhost:3000', {
@@ -84,12 +84,12 @@ function App() {
                 {!message.assignedAgent && (
                   <button
                     className="btn btn-sm btn-success ms-2"
-                    onClick={() => assignMessage(message._id, 'agent123')} // Replace 'agent123' with the actual agent ID
+                    onClick={() => assignMessage(message._id, 'locked by Albert')} // Replace 'agent123' with the actual agent ID
                   >
                     Assign
                   </button>
                 )}
-                {message.assignedAgent === 'agent123' && !message.lockedBy && (
+                {message.assignedAgent === 'Albert' && !message.lockedBy && (
                   <button
                     className="btn btn-sm btn-warning ms-2"
                     onClick={() => lockMessage(message._id, 'agent123')} // Replace 'agent123' with the actual agent ID
