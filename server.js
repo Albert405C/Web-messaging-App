@@ -20,7 +20,6 @@ const io = socketIo(server, {
   },
 });
 
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -69,10 +68,38 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Socket event handler for assigning messages to agents
+  socket.on('assignMessage', async (data, callback) => {
+    const { messageId, agentId } = data;
+
+    try {
+      const message = await Message.findById(messageId);
+
+      if (!message) {
+        return callback({ error: 'Message not found' });
+      }
+
+      if (message.status === 'unassigned') {
+        // Assign the message to the agent
+        message.status = 'assigned';
+        message.agentId = agentId;
+
+        await message.save();
+        io.emit('messageAssigned', { messageId, agentId });
+
+        callback({ success: true });
+      } else {
+        // Message is already assigned or completed
+        callback({ error: 'Message already assigned or completed' });
+      }
+    } catch (error) {
+      console.error('Error assigning message:', error);
+      callback({ error: 'Internal server error' });
+    }
+  });
+
   // Rest of your existing socket.io connection handling code
-
 });
-
 
 // Endpoint to seed messages from CSV file
 app.get('/seed-messages', async (req, res) => {
@@ -85,7 +112,6 @@ app.get('/seed-messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 // Endpoint to get messages
 app.get('/messages', async (req, res) => {

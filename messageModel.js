@@ -6,12 +6,14 @@ const messageSchema = new mongoose.Schema({
   message: String,
   timestamp: { type: Date, default: Date.now },
   isUrgent: { type: Boolean, default: false },
+  status: { type: String, default: 'unassigned' }, // Add status field
+  agentId: String, // Assuming agentId is a string, adjust as needed
 });
 
 const Message = mongoose.model('Message', messageSchema);
 
-// Define a function that takes 'socket' as a parameter
-const initializeSocketListener = (socket) => {
+// Define a function that takes 'socket' and 'io' as parameters
+const initializeSocketListener = (socket, io) => {
   socket.on('assignMessage', async (data, callback) => {
     const { messageId, agentId } = data;
 
@@ -23,11 +25,9 @@ const initializeSocketListener = (socket) => {
       }
 
       if (message.status === 'unassigned') {
-        // Assign the message to the agent
-        message.status = 'assigned';
-        message.agentId = agentId;
+        // Use $set to update specific fields without affecting others
+        await message.updateOne({ $set: { status: 'assigned', agentId: agentId } });
 
-        await message.save();
         io.emit('messageAssigned', { messageId, agentId });
 
         callback({ success: true });
@@ -37,9 +37,9 @@ const initializeSocketListener = (socket) => {
       }
     } catch (error) {
       console.error('Error assigning message:', error);
-      callback({ error: 'Internal server error' });
+      callback({ error: 'Internal server error', details: error.message });
     }
   });
 };
 
-module.exports = Message;
+module.exports = { Message, initializeSocketListener };

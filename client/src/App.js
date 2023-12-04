@@ -1,8 +1,15 @@
+// client/src/App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
-const socket = io('http://localhost:3000'); // Establish Socket.IO connection outside the component
+
+const socket = io('http://localhost:3000', {
+  withCredentials: true,
+  extraHeaders: {
+    "my-custom-header": "some-value"
+  }
+});
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -11,28 +18,36 @@ function App() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/messages');
+    // Fetch initial messages from the server
+    axios.get('http://localhost:3000/messages')
+      .then(response => {
         setMessages(response.data);
-      } catch (error) {
+        setLoading(false);
+      })
+      .catch(error => {
         console.error(error);
         setError('Error fetching messages');
-      } finally {
         setLoading(false);
-      }
-    };
-
-    fetchData();
+      });
 
     // Listen for 'messageAdded' events from the server
     socket.on('messageAdded', (newMessage) => {
-      setMessages((prevMessages) => [newMessage, ...prevMessages]);
+      setMessages(prevMessages => [newMessage, ...prevMessages]);
     });
 
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
       setMessages(seededMessages);
+    });
+
+    // Listen for 'messageAssigned' events from the server
+    socket.on('messageAssigned', ({ messageId, agentId }) => {
+      // Update the UI to reflect the assigned message
+      setMessages(prevMessages => {
+        return prevMessages.map(message =>
+          message._id === messageId ? { ...message, agentId, status: 'assigned' } : message
+        );
+      });
     });
 
     return () => {
@@ -43,33 +58,23 @@ function App() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewMessage((prevMessage) => ({ ...prevMessage, [name]: value }));
+    setNewMessage(prevMessage => ({ ...prevMessage, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios
-      .post('http://localhost:3000/newMessage', { ...newMessage })
-      .then((response) => {
+    axios.post('http://localhost:3000/newMessage', { ...newMessage })
+      .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ userId: '', messageBody: '' });
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
         setError('Error sending the message');
       });
   };
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
-
 
   return (
     <div className="container mt-4">
@@ -85,6 +90,7 @@ function App() {
               {messages.map(message => (
                 <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
                   <strong>{message.userId}:</strong> {message.messageBody}
+                  {message.agentId && <span className="assigned-message">Assigned to Agent {message.agentId}</span>}
                 </li>
               ))}
             </ul>
