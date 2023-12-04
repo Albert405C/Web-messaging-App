@@ -23,6 +23,7 @@ const port = 3000;
 const filePath = 'C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv';
 
 // Middleware
+app.use('/api', messageRouter);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
