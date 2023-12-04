@@ -42,4 +42,4 @@ const initializeSocketListener = (socket, io) => {
   });
 };
 
-module.exports = { Message, initializeSocketListener };
+module.exports = mongoose.model('Message', MessageSchema);
