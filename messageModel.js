@@ -42,4 +42,4 @@ const initializeSocketListener = (socket) => {
   });
 };
 
-module.exports = { Message, initializeSocketListener };
+module.exports = Message;
