@@ -12,6 +12,12 @@ const app = express();
 const filePath = 'C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDrive Documents\\messages.csv';
 
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+ });
+ 
 
 mongoose.connect('mongodb://localhost:27017/messaging', {
  useNewUrlParser: true,

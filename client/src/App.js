@@ -3,7 +3,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3000', {
   withCredentials: true, // Add this line if needed
   extraHeaders: {
     "my-custom-header": "some-value" // Add any custom headers if needed
@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
+    axios.get('http://localhost:3001/messages')
       .then(response => setMessages(response.data))
       .catch(error => console.error(error));
 
@@ -63,12 +63,12 @@ function App() {
   };
 
   const assignMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3001/messages/assign/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
   const lockMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3001/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
