@@ -6,6 +6,7 @@ const messageSchema = new Schema({
  sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
  conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
  timestamp: { type: Date, default: Date.now },
+ status: { type: String, default: 'unassigned' }, 
 });
 
 const Message = mongoose.model('Message', messageSchema);

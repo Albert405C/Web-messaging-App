@@ -4,7 +4,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3000', {
   withCredentials: true,
   extraHeaders: {
     "my-custom-header": "some-value"
@@ -29,7 +29,21 @@ function App() {
         setError('Error fetching messages');
         setLoading(false);
       });
+ // Fetch CSV content from the server
+ axios.get('http://localhost:3000/csv-content')
+ .then(response => {
+   setCSVContent(response.data.csvContent);
+ })
+ .catch(error => {
+   console.error(error);
+   setError('Error fetching CSV content');
+ });
 
+// Display CSV Content
+<h2 className="mt-4">CSV Content:</h2>
+{csvContent.map((line, index) => (
+ <p key={index}>{line}</p>
+))}
     // Listen for 'messageAdded' events from the server
     socket.on('messageAdded', (newMessage) => {
       setMessages(prevMessages => [newMessage, ...prevMessages]);

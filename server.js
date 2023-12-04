@@ -10,8 +10,9 @@ const csvParser = require('csv-parser');
 const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
+const messageRouter = require('./messageRouter.js');
 const server = http.createServer(app);
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: 'http://localhost:3001' }));
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3001',
@@ -105,7 +106,10 @@ io.on('connection', (socket) => {
 app.get('/seed-messages', async (req, res) => {
   try {
     const seededMessages = await seedMessages();  // Assuming seedMessages returns the seeded messages
-    io.emit('seededMessages', seededMessages);  // Emit the 'seededMessages' event to connected clients
+
+    // Emit the 'seededMessages' event to connected clients
+    io.emit('seededMessages', seededMessages);
+
     res.json({ success: true, message: 'Messages seeded successfully' });
   } catch (error) {
     console.error('Error seeding messages:', error);
@@ -122,6 +126,17 @@ app.get('/messages', async (req, res) => {
     res.json(sortedMessages);
   } catch (error) {
     console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Endpoint to get CSV file contents
+app.get('/csv-content', async (req, res) => {
+  try {
+    const csvContent = await readCSVFile();  // Implement this function to read CSV content from MongoDB
+    res.json({ success: true, csvContent });
+  } catch (error) {
+    console.error('Error fetching CSV content:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
