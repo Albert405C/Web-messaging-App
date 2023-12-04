@@ -20,8 +20,6 @@ const io = socketIo(server, {
   },
 });
 
-messageModel.initializeSocketListener(io);
-
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
