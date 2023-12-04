@@ -65,22 +65,23 @@ function App() {
 
   return (
     <div className="container mt-4">
-      <h1 className="mb-4">Branch Messaging App</h1>
-      <div className="row">
-        <div className="col-md-8">
-          <ul className="list-group">
-            {messages.map(message => (
-              <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
-                <strong>{message.sender}:</strong> {message.content}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="col-md-4">
-          {/* Form for sending new messages */}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="form-label" htmlFor="sender">Sender:</label>
+    <h1 className="mb-4">Branch Messaging App</h1>
+    <div className="row">
+      <div className="col-md-8">
+        <ul className="list-group">
+          {messages.map(message => (
+            <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
+              <strong>{message.sender}:</strong> {message.content}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="col-md-4">
+        {/* Form for sending new messages */}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="sender" className="form-label">
+              Sender:
               <input
                 type="text"
                 className="form-control"
@@ -89,9 +90,11 @@ function App() {
                 value={newMessage.sender}
                 onChange={handleInputChange}
               />
-            </div>
-            <div className="mb-3">
-              <label className="form-label">Content:</label>
+            </label>
+          </div>
+          <div className="mb-3">
+            <label htmlFor="content" className="form-label">
+              Content:
               <input
                 type="text"
                 className="form-control"
@@ -99,12 +102,16 @@ function App() {
                 value={newMessage.content}
                 onChange={handleInputChange}
               />
-            </div>
-            <button type="submit" className="btn btn-primary">Send Message</button>
-          </form>
-        </div>
+            </label>
+          </div>
+          <button type="submit" className="btn btn-primary">
+            Send Message
+          </button>
+        </form>
       </div>
     </div>
+  </div>
+  
   );
 }
 
