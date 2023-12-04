@@ -65,52 +65,54 @@ function App() {
 
   return (
     <div className="container mt-4">
-    <h1 className="mb-4">Branch Messaging App</h1>
-    <div className="row">
-      <div className="col-md-8">
-        <ul className="list-group">
-          {messages.map(message => (
-            <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
-              <strong>{message.sender}:</strong> {message.content}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="col-md-4">
-        {/* Form for sending new messages */}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="sender" className="form-label">
-              Sender:
-              <input
-                type="text"
-                className="form-control"
-                id="sender"
-                name="sender"
-                value={newMessage.sender}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="content" className="form-label">
-              Content:
-              <input
-                type="text"
-                className="form-control"
-                name="content"
-                value={newMessage.content}
-                onChange={handleInputChange}
-              />
-            </label>
-          </div>
-          <button type="submit" className="btn btn-primary">
-            Send Message
-          </button>
-        </form>
-      </div>
+  <h1 className="mb-4">Branch Messaging App</h1>
+  <div className="row">
+    <div className="col-md-8">
+      <ul className="list-group">
+        {messages.map(message => (
+          <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
+            <strong>{message.sender}:</strong> {message.content}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div className="col-md-4">
+      {/* Form for sending new messages */}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="sender" className="form-label">
+            Sender:
+            <input
+              type="text"
+              className="form-control"
+              id="sender"
+              name="sender"
+              value={newMessage.sender}
+              onChange={handleInputChange}
+            />
+          </label>
+        </div>
+        <div className="mb-3">
+          <label htmlFor="content" className="form-label">
+            Content:
+            <input
+              type="text"
+              className="form-control"
+              id="content"
+              name="content"
+              value={newMessage.content}
+              onChange={handleInputChange}
+            />
+          </label>
+        </div>
+        <button type="submit" className="btn btn-primary">
+          Send Message
+        </button>
+      </form>
     </div>
   </div>
+</div>
+
   
   );
 }

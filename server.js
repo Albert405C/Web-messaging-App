@@ -19,9 +19,6 @@ const io = socketIo(server, {
   },
 });
 
-const port = 3000;
-const filePath = 'C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv';
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -39,41 +36,75 @@ mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, u
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
+
+  // New socket.on handler for new messages
+  socket.on('newMessage', async (data, callback) => {
+    const { userId, messageBody } = data;
+
+    if (!userId || !messageBody) {
+      return console.error('Invalid message data');
+    }
+
+    const newMessage = new Message({
+      customer_name: userId.toString(),
+      customer_email: '', // You can leave customer_email empty or set it based on your data
+      message: messageBody,
+      timestamp: new Date(),
+    });
+
+    // Implement basic authentication
+    if (!socket.handshake.session.loggedIn) {
+      return callback({ error: 'Unauthorized access' });
+    }
+
+    try {
+      await newMessage.save();
+      io.emit('messageAdded', newMessage);
+      callback({ success: true });
+    } catch (error) {
+      console.error('Error saving message:', error);
+      callback({ error: 'Internal server error' });
+    }
+  });
+
+  // Rest of your existing socket.io connection handling code
+
 });
 
 // Seed messages
 const csvtoarray = (csvText) => {
   return csvText.split('\n').map(line => {
-     return line.split(',').reduce((object, value, index) => {
-       object[headers[index]] = value;
-       return object;
-     }, {});
+    return line.split(',').reduce((object, value, index) => {
+      object[headers[index]] = value;
+      return object;
+    }, {});
   });
- };
- 
- const seedMessages = async () => {
+};
+
+const seedMessages = async () => {
   const messages = [];
   const fileContent = fs.readFileSync('C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv', 'utf8');
   const csvArray = csvtoarray(fileContent);
- 
+
   for (const row of csvArray) {
-     // Check if the required columns exist in the row
-     if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
-       const newMessage = new Message({
-         customer_name: row['User ID'].toString(),
-         customer_email: '', // You can leave customer_email empty or set it based on your data
-         message: row['Message Body'],
-         timestamp: new Date(row['Timestamp (UTC)']),
-       });
-       messages.push(newMessage);
-     } else {
-       console.error('Invalid row format:', row);
-     }
+    // Check if the required columns exist in the row
+    if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
+      const newMessage = new Message({
+        customer_name: row['User ID'].toString(),
+        customer_email: '', // You can leave customer_email empty or set it based on your data
+        message: row['Message Body'],
+        timestamp: new Date(row['Timestamp (UTC)']),
+      });
+      messages.push(newMessage);
+    } else {
+      console.error('Invalid row format:', row);
+    }
   }
- 
+
   await Message.insertMany(messages);
   io.emit('seededMessages', messages);
- };
+};
+
 app.get('/messages', async (req, res) => {
   const messages = await Message.find();
   // Sort messages based on urgency (this is just an example, adjust as needed)
@@ -84,6 +115,6 @@ app.get('/messages', async (req, res) => {
 // Use the routes from messageRouter
 app.use('/', messageRouter);
 
-server.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
