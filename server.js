@@ -16,6 +16,7 @@ app.use(cors({
   optionsSuccessStatus: 204,
 }));
 
+
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb://localhost/branch-messaging-app', {
