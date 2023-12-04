@@ -42,32 +42,38 @@ io.on('connection', (socket) => {
 });
 
 // Seed messages
-const seedMessages = async () => {
+const csvtoarray = (csvText) => {
+  return csvText.split('\n').map(line => {
+     return line.split(',').reduce((object, value, index) => {
+       object[headers[index]] = value;
+       return object;
+     }, {});
+  });
+ };
+ 
+ const seedMessages = async () => {
   const messages = [];
-  fs.createReadStream(filePath)
-    .pipe(csvParser())
-    .on('data', (row) => {
-      // Check if the required columns exist in the row
-      if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
-        const newMessage = new Message({
-          customer_name: row['User ID'].toString(),
-          customer_email: '', // You can leave customer_email empty or set it based on your data
-          message: row['Message Body'],
-          timestamp: new Date(row['Timestamp (UTC)']),
-        });
-        messages.push(newMessage);
-      } else {
-        console.error('Invalid row format:', row);
-      }
-    })
-    .on('end', async () => {
-      await Message.insertMany(messages);
-      io.emit('seededMessages', messages);
-    });
-};
-
-seedMessages();
-
+  const fileContent = fs.readFileSync('C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv', 'utf8');
+  const csvArray = csvtoarray(fileContent);
+ 
+  for (const row of csvArray) {
+     // Check if the required columns exist in the row
+     if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
+       const newMessage = new Message({
+         customer_name: row['User ID'].toString(),
+         customer_email: '', // You can leave customer_email empty or set it based on your data
+         message: row['Message Body'],
+         timestamp: new Date(row['Timestamp (UTC)']),
+       });
+       messages.push(newMessage);
+     } else {
+       console.error('Invalid row format:', row);
+     }
+  }
+ 
+  await Message.insertMany(messages);
+  io.emit('seededMessages', messages);
+ };
 app.get('/messages', async (req, res) => {
   const messages = await Message.find();
   // Sort messages based on urgency (this is just an example, adjust as needed)
