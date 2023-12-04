@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors'); // Import cors module
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http');
@@ -47,11 +47,21 @@ const seedMessages = async () => {
 seedMessages();
 
 app.get('/messages', async (req, res) => {
+  // Set CORS headers in the response
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   const messages = await Message.find();
   res.json(messages);
 });
 
 app.post('/messages', async (req, res) => {
+  // Set CORS headers in the response
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+
   const { sender, content } = req.body;
   const newMessage = new Message({ sender, content });
   await newMessage.save();
