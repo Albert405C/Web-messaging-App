@@ -49,32 +49,23 @@ io.on('connection', (socket) => {
 });
 
 const seedMessages = async () => {
- const messages = [];
- fs.writeFile('C:/Users/ADMIN/OneDrive/Desktop/Messaging Web App/UsersADMINOneDrive Documents/messages.csv', '', (err) => {
-  if (err) {
-    console.error('An error occurred while creating the file:', err);
-  } else {
-    console.log('File created successfully.');
-  }
-});
-
-fs.createReadStream("C:/Users/ADMIN/OneDrive/Documents/messages.csv")
-  .pipe(csvParser())
-  .on('data', (row) => {
-    const newMessage = new Message({
-      sender: row.sender,
-      content: row.content,
+  const messages = [];
+  fs.createReadStream(filePath)  // Use the correct file path variable
+    .pipe(csvParser())
+    .on('data', (row) => {
+      const newMessage = new Message({
+        sender: row.sender,
+        content: row.content,
+      });
+      messages.push(newMessage);
+    })
+    .on('end', async () => {
+      await Message.insertMany(messages);
+      io.emit('seededMessages', messages);  // Emit event after seeding messages
     });
-    messages.push(newMessage);
-  })
-  .on('end', async () => {
-    await Message.insertMany(messages);
-  });
-};
-
-seedMessages();
+ };
  
-
+ seedMessages();
 app.get('/messages', async (req, res) => {
  const messages = await Message.find();
  res.json(messages);
@@ -130,25 +121,25 @@ app.post('/messages/lock/:messageId/:agentId', async (req, res) => {
  res.json(message);
 });
 
-app.post('/messages/unlock/:messageId/:agentId', async (req, res) => {
- const { messageId, agentId } = req.params;
- const message = await Message.findById(messageId);
-
- if (!message) {
-    return res.status(404).json({ error: 'Message not found' });
- }
-
- if (message.lockedBy !== agentId) {
-    return res.status(403).json({ error: 'Message is locked by another agent' });
- }
-
- message.lockedBy = null;
- await message.save();
-
- io.emit('unlockedMessage', message);
-
- res.json(message);
-});
+app.post('/messages/assign/:messageId/:agentId', async (req, res) => {
+  const { messageId, agentId } = req.params;
+  const message = await Message.findById(messageId);
+ 
+  if (!message) {
+     return res.status(404).json({ error: 'Message not found' });
+  }
+ 
+  if (message.lockedBy && message.lockedBy !== agentId) {
+     return res.status(403).json({ error: 'Message is locked by another agent' });
+  }
+ 
+  message.assignedAgent = agentId;
+  await message.save();
+ 
+  io.emit('assignedMessage', message);
+ 
+  res.json(message);
+ });
 
 server.listen(port, () => {
  console.log(`Server is running on port ${port}`);

@@ -14,36 +14,46 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState({ sender: '', content: '' });
 
-  useEffect(() => {
-    // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
-      .then(response => setMessages(response.data))
-      .catch(error => console.error(error));
+// Inside the 'useEffect' hook in your React component
+useEffect(() => {
+  // Fetch initial messages from the server
+  axios.get('http://localhost:3000/messages')
+    .then(response => setMessages(response.data))
+    .catch(error => console.error(error));
 
-    // Listen for 'newMessage' events from the server
-    socket.on('newMessage', (newMessage) => {
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-    });
+  // Listen for 'newMessage' events from the server
+  socket.on('newMessage', (newMessage) => {
+    setMessages(prevMessages => [newMessage, ...prevMessages]);
+  });
 
-    // Listen for 'assignedMessage' events from the server
-    socket.on('assignedMessage', (assignedMessage) => {
-      setMessages(prevMessages => prevMessages.map(message =>
-        (message._id === assignedMessage._id ? assignedMessage : message)
-      ));
-    });
+  // Listen for 'assignedMessage' events from the server
+  socket.on('assignedMessage', (assignedMessage) => {
+    setMessages(prevMessages => prevMessages.map(message =>
+      (message._id === assignedMessage._id ? assignedMessage : message)
+    ));
 
-    // Listen for 'lockedMessage' events from the server
-    socket.on('lockedMessage', (lockedMessage) => {
-      setMessages(prevMessages => prevMessages.map(message =>
-        (message._id === lockedMessage._id ? lockedMessage : message)
-      ));
-    });
+    // Prompt the user to lock the message after assigning
+    alert('Message assigned. Please lock the message to start working on it.');
+  });
 
-    return () => {
-      // Disconnect the socket when the component unmounts
-      socket.disconnect();
-    };
-  }, []);
+  // Listen for 'lockedMessage' events from the server
+  socket.on('lockedMessage', (lockedMessage) => {
+    setMessages(prevMessages => prevMessages.map(message =>
+      (message._id === lockedMessage._id ? lockedMessage : message)
+    ));
+  });
+
+  // Listen for 'seededMessages' events from the server
+  socket.on('seededMessages', (seededMessages) => {
+    // Update the state with the seeded messages
+    setMessages(seededMessages);
+  });
+
+  return () => {
+    // Disconnect the socket when the component unmounts
+    socket.disconnect();
+  };
+}, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
