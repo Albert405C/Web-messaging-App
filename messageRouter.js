@@ -14,18 +14,13 @@ router.get('/messages', async (req, res) => {
 });
 
 // POST a new message
-router.post('/', async (req, res) => {
-    const { sender, content } = req.body;
-    if (!sender || !content) {
-       return res.status(400).json({ error: 'Both Sender and Content are required' });
-    }
-    const newMessage = new Message({
-       customer_name: sender,
-       message: content,
-    });
-    await newMessage.save();
-    res.status(201).json(newMessage);
-   });
+router.post('/messages', async (req, res) => {
+  const message = new Message({
+    customer_name: req.body.customer_name,
+    customer_email: req.body.customer_email,
+    message: req.body.message,
+    timestamp: new Date(),
+  });
 
   try {
     const savedMessage = await message.save();
@@ -33,7 +28,7 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-
+});
 
 // PUT a new response to a message
 router.put('/messages/:id', async (req, res) => {
@@ -47,4 +42,4 @@ router.put('/messages/:id', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = ro

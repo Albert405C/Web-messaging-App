@@ -47,33 +47,24 @@ const seedMessages = async () => {
   fs.createReadStream(filePath)
     .pipe(csvParser())
     .on('data', (row) => {
-      // Check if the required columns exist in the row
-      if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
-        const newMessage = new Message({
-          _id: new mongoose.Types.ObjectId(), // Generate a new ObjectId
-          customer_name: row['User ID'].toString(),
-          customer_email: '', // You can leave customer_email empty or set it based on your data
-          message: row['Message Body'],
-          timestamp: new Date(row['Timestamp (UTC)']),
-        });
-        messages.push(newMessage);
-      } else {
-        console.error('Invalid row format:', row);
-      }
+      const newMessage = new Message({
+        customer_name: row['User ID'].toString(),
+        customer_email: '', // You can leave customer_email empty or set it based on your data
+        message: row['Message Body'],
+        timestamp: new Date(row['Timestamp (UTC)']),
+      });
+      messages.push(newMessage);
     })
     .on('end', async () => {
-      const savedMessages = await Promise.all(messages.map(async (newMessage) => {
-        return await newMessage.save();
-      }));
-      await Message.insertMany(savedMessages);
-      io.emit('seededMessages', savedMessages);
+      await Message.insertMany(messages);
+      io.emit('seededMessages', messages);
     });
 };
 
 seedMessages();
 
 // Use the routes from messageRouter
-app.use('/api', messageRouter);
+app.use('/', messageRouter);
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
