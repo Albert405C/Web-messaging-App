@@ -42,4 +42,4 @@ router.put('/messages/:id', async (req, res) => {
   }
 });
 
-module.exports = ro
+module.exports = router;
