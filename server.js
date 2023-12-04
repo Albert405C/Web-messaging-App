@@ -72,15 +72,18 @@ io.on('connection', (socket) => {
 });
 
 // Endpoint to seed messages from CSV file
+// Endpoint to seed messages from CSV file
 app.get('/seed-messages', async (req, res) => {
   try {
-    await seedMessages();  // Assuming seedMessages is defined
+    const seededMessages = await seedMessages();  // Assuming seedMessages returns the seeded messages
+    io.emit('seededMessages', seededMessages);  // Emit the 'seededMessages' event to connected clients
     res.json({ success: true, message: 'Messages seeded successfully' });
   } catch (error) {
     console.error('Error seeding messages:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Endpoint to get messages
 app.get('/messages', async (req, res) => {

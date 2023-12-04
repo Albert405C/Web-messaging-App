@@ -60,7 +60,10 @@ function App() {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ userId: '', messageBody: '' });
       })
-      .catch(error => console.error(error));
+      .catch(error => {
+        console.error(error);
+        setError('Error sending the message');
+      });
   };
 
   return (
