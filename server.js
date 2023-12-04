@@ -4,8 +4,11 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http');
 const socketIo = require('socket.io');
+const fs = require('fs');
+const csv = require('csv-parser');
 
 const app = express();
+
 const port = 3000;
 
 // Use the cors middleware
@@ -17,7 +20,16 @@ mongoose.connect('mongodb://localhost/Messaging-Web-App', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-
+fs.createReadStream('C:\Users\ADMIN\OneDrive\Desktop\Messaging Web App\Messages\GeneralistRails_Project_MessageData_1 (2).csv')
+  .pipe(csv())
+  .on('data', async (row) => {
+    // Save each row as a message in the database
+    const newMessage = new Message(row);
+    await newMessage.save();
+  })
+  .on('end', () => {
+    console.log('CSV file successfully processed and messages imported.');
+  });
 const messageSchema = new mongoose.Schema({
   sender: String,
   content: String,
