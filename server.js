@@ -5,7 +5,8 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 const fs = require('fs');
-const parse = ('csv-parser');
+const parse = require('csv-parser/lib/sync');
+
 
 const app = express();
 const port = 3000;
