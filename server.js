@@ -21,7 +21,7 @@ mongoose.connect('mongodb://localhost/Messaging-Web-App', {
   useUnifiedTopology: true,
 });
 
-fs.createReadStream('C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDriveDesktopMessaging Web App\\MessagesGeneralistRails_Project_MessageData_1 (2).csv')
+fs.createReadStream('"C:\\Users\\ADMIN\\OneDrive\\Documents\\messages.csv"')
   .pipe(csv())
   .on('data', async (row) => {
     // Save each row as a message in the database
