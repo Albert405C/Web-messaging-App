@@ -130,16 +130,32 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-// Endpoint to get CSV file contents
+
+
+// Function to read CSV file and return an array of lines
+const readCSVFile = (filePath) => {
+  return new Promise((resolve, reject) => {
+    const lines = [];
+    fs.createReadStream(filePath)
+      .pipe(csvParser())
+      .on('data', (data) => lines.push(data))
+      .on('end', () => resolve(lines))
+      .on('error', (error) => reject(error));
+  });
+};
+
+// Use readCSVFile in your endpoint
 app.get('/csv-content', async (req, res) => {
   try {
-    const csvContent = await readCSVFile();  // Implement this function to read CSV content from MongoDB
-    res.json({ success: true, csvContent });
+    const csvContent = await readCSVFile('C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv');
+    res.json({ csvContent });
   } catch (error) {
-    console.error('Error fetching CSV content:', error);
+    console.error('Error reading CSV file:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // Use the routes from messageRouter
 app.use('/', messageRouter);
