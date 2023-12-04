@@ -1,13 +1,11 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const messageSchema = new mongoose.Schema({
-  customer_name: String,
-  customer_email: String,
-  message: String,
-  timestamp: { type: Date, default: Date.now },
-  isUrgent: { type: Boolean, default: false },
-  status: { type: String, default: 'unassigned' }, // Add status field
-  agentId: String, // Assuming agentId is a string, adjust as needed
+const messageSchema = new Schema({
+ text: { type: String, required: true },
+ sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+ conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
+ timestamp: { type: Date, default: Date.now },
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -42,4 +40,4 @@ const initializeSocketListener = (socket, io) => {
   });
 };
 
-module.exports = mongoose.model('Message', MessageSchema);
+module.exports = Message;
