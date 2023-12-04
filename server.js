@@ -47,19 +47,25 @@ const seedMessages = async () => {
   fs.createReadStream(filePath)
     .pipe(csvParser())
     .on('data', (row) => {
-      const newMessage = new Message({
-        customer_name: row['User ID'].toString(),
-        customer_email: '', // You can leave customer_email empty or set it based on your data
-        message: row['Message Body'],
-        timestamp: new Date(row['Timestamp (UTC)']),
-      });
-      messages.push(newMessage);
+      // Check if the required columns exist in the row
+      if (row['_id'] && row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
+        const newMessage = new Message({
+          customer_name: row['User ID'].toString(),
+          customer_email: '', // You can leave customer_email empty or set it based on your data
+          message: row['Message Body'],
+          timestamp: new Date(row['Timestamp (UTC)']),
+        });
+        messages.push(newMessage);
+      } else {
+        console.error('Invalid row format:', row);
+      }
     })
     .on('end', async () => {
       await Message.insertMany(messages);
       io.emit('seededMessages', messages);
     });
 };
+
 
 seedMessages();
 
