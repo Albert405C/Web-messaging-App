@@ -1,3 +1,4 @@
+// client/src/App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -25,23 +26,6 @@ function App() {
       setMessages(prevMessages => [newMessage, ...prevMessages]);
     });
 
-    // Listen for 'assignedMessage' events from the server
-    socket.on('assignedMessage', (assignedMessage) => {
-      setMessages(prevMessages => prevMessages.map(message =>
-        (message._id === assignedMessage._id ? assignedMessage : message)
-      ));
-
-      // Prompt the user to lock the message after assigning
-      alert('Message assigned. Please lock the message to start working on it.');
-    });
-
-    // Listen for 'lockedMessage' events from the server
-    socket.on('lockedMessage', (lockedMessage) => {
-      setMessages(prevMessages => prevMessages.map(message =>
-        (message._id === lockedMessage._id ? lockedMessage : message)
-      ));
-    });
-
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
       // Update the state with the seeded messages
@@ -63,21 +47,11 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3000/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
+    axios.post('http://localhost:3000/messages', { ...newMessage })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ sender: '', content: '' });
       })
-      .catch(error => console.error(error));
-  };
-
-  const assignMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
-      .catch(error => console.error(error));
-  };
-
-  const lockMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
@@ -88,24 +62,8 @@ function App() {
         <div className="col-md-8">
           <ul className="list-group">
             {messages.map(message => (
-              <li key={message._id} className="list-group-item">
+              <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
                 <strong>{message.sender}:</strong> {message.content}
-                {!message.assignedAgent && (
-                  <button
-                    className="btn btn-sm btn-success ms-2"
-                    onClick={() => assignMessage(message._id, 'locked by Albert')}
-                  >
-                    Assign
-                  </button>
-                )}
-                {message.assignedAgent === 'Albert' && !message.lockedBy && (
-                  <button
-                    className="btn btn-sm btn-warning ms-2"
-                    onClick={() => lockMessage(message._id, 'agent123')}
-                  >
-                    Lock
-                  </button>
-                )}
               </li>
             ))}
           </ul>

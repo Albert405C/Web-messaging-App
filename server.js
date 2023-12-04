@@ -48,7 +48,7 @@ const seedMessages = async () => {
     .pipe(csvParser())
     .on('data', (row) => {
       // Check if the required columns exist in the row
-      if (row['_id'] && row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
+      if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
         const newMessage = new Message({
           customer_name: row['User ID'].toString(),
           customer_email: '', // You can leave customer_email empty or set it based on your data
@@ -66,8 +66,14 @@ const seedMessages = async () => {
     });
 };
 
-
 seedMessages();
+
+app.get('/messages', async (req, res) => {
+  const messages = await Message.find();
+  // Sort messages based on urgency (this is just an example, adjust as needed)
+  const sortedMessages = messages.sort((a, b) => (a.isUrgent ? -1 : 1));
+  res.json(sortedMessages);
+});
 
 // Use the routes from messageRouter
 app.use('/', messageRouter);
