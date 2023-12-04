@@ -4,7 +4,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3000', {
   withCredentials: true,
   extraHeaders: {
     "my-custom-header": "some-value"
@@ -13,30 +13,30 @@ const socket = io('http://localhost:3001', {
 
 function App() {
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState({ sender: '', content: '' });
+  const [newMessage, setNewMessage] = useState({ userId: '', messageBody: '' });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('Messages:', messages);
     // Fetch initial messages from the server
     axios.get('http://localhost:3000/messages')
-    .then(response => {
-      console.log('Received messages from server:', response.data);
-      setMessages(response.data);
-    })
-    .catch(error => console.error(error));
-      
+      .then(response => {
+        setMessages(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error(error);
+        setError('Error fetching messages');
+        setLoading(false);
+      });
 
-  
-    // Listen for 'newMessage' events from the server
-    socket.on('newMessage', (newMessage) => {
-      console.log('Received new message:', newMessage);
+    // Listen for 'messageAdded' events from the server
+    socket.on('messageAdded', (newMessage) => {
       setMessages(prevMessages => [newMessage, ...prevMessages]);
     });
 
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
-      console.log('Received seeded messages:', seededMessages);
-      // Update the state with the seeded messages
       setMessages(seededMessages);
     });
 
@@ -55,65 +55,69 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3000/messages', { ...newMessage })
+    axios.post('http://localhost:3000/newMessage', { ...newMessage })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
-        setNewMessage({ sender: '', content: '' });
+        setNewMessage({ userId: '', messageBody: '' });
       })
       .catch(error => console.error(error));
   };
 
   return (
     <div className="container mt-4">
-  <h1 className="mb-4">Branch Messaging App</h1>
-  <div className="row">
-    <div className="col-md-8">
-      <ul className="list-group">
-        {messages.map(message => (
-          <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
-            <strong>{message.sender}:</strong> {message.content}
-          </li>
-        ))}
-      </ul>
-    </div>
-    <div className="col-md-4">
-      {/* Form for sending new messages */}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="sender" className="form-label">
-            Sender:
-            <input
-              type="text"
-              className="form-control"
-              id="sender"
-              name="sender"
-              value={newMessage.sender}
-              onChange={handleInputChange}
-            />
-          </label>
+      <h1 className="mb-4">Branch Messaging App</h1>
+      <div className="row">
+        <div className="col-md-8">
+          {loading ? (
+            <p>Loading messages...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : (
+            <ul className="list-group">
+              {messages.map(message => (
+                <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
+                  <strong>{message.userId}:</strong> {message.messageBody}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <div className="mb-3">
-          <label htmlFor="content" className="form-label">
-            Content:
-            <input
-              type="text"
-              className="form-control"
-              id="content"
-              name="content"
-              value={newMessage.content}
-              onChange={handleInputChange}
-            />
-          </label>
+        <div className="col-md-4">
+          {/* Form for sending new messages */}
+          <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+              <label htmlFor="userId" className="form-label">
+                User ID:
+                <input
+                  type="text"
+                  className="form-control"
+                  id="userId"
+                  name="userId"
+                  value={newMessage.userId}
+                  onChange={handleInputChange}
+                />
+              </label>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="messageBody" className="form-label">
+                Message Body:
+                <input
+                  type="text"
+                  className="form-control"
+                  id="messageBody"
+                  name="messageBody"
+                  value={newMessage.messageBody}
+                  onChange={handleInputChange}
+                />
+              </label>
+            </div>
+            <button type="submit" className="btn btn-primary">
+              Send Message
+            </button>
+          </form>
         </div>
-        <button type="submit" className="btn btn-primary">
-          Send Message
-        </button>
-      </form>
+      </div>
     </div>
-  </div>
-</div>
-
-  
   );
 }
 

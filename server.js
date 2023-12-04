@@ -37,7 +37,7 @@ mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, u
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  // New socket.on handler for new messages
+  // Socket event handler for new messages
   socket.on('newMessage', async (data, callback) => {
     const { userId, messageBody } = data;
 
@@ -71,45 +71,28 @@ io.on('connection', (socket) => {
 
 });
 
-// Seed messages
-const csvtoarray = (csvText) => {
-  return csvText.split('\n').map(line => {
-    return line.split(',').reduce((object, value, index) => {
-      object[headers[index]] = value;
-      return object;
-    }, {});
-  });
-};
-
-const seedMessages = async () => {
-  const messages = [];
-  const fileContent = fs.readFileSync('C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv', 'utf8');
-  const csvArray = csvtoarray(fileContent);
-
-  for (const row of csvArray) {
-    // Check if the required columns exist in the row
-    if (row['User ID'] && row['Timestamp (UTC)'] && row['Message Body']) {
-      const newMessage = new Message({
-        customer_name: row['User ID'].toString(),
-        customer_email: '', // You can leave customer_email empty or set it based on your data
-        message: row['Message Body'],
-        timestamp: new Date(row['Timestamp (UTC)']),
-      });
-      messages.push(newMessage);
-    } else {
-      console.error('Invalid row format:', row);
-    }
+// Endpoint to seed messages from CSV file
+app.get('/seed-messages', async (req, res) => {
+  try {
+    await seedMessages();  // Assuming seedMessages is defined
+    res.json({ success: true, message: 'Messages seeded successfully' });
+  } catch (error) {
+    console.error('Error seeding messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
+});
 
-  await Message.insertMany(messages);
-  io.emit('seededMessages', messages);
-};
-
+// Endpoint to get messages
 app.get('/messages', async (req, res) => {
-  const messages = await Message.find();
-  // Sort messages based on urgency (this is just an example, adjust as needed)
-  const sortedMessages = messages.sort((a, b) => (a.isUrgent ? -1 : 1));
-  res.json(sortedMessages);
+  try {
+    const messages = await Message.find();
+    // Sort messages based on urgency (this is just an example, adjust as needed)
+    const sortedMessages = messages.sort((a, b) => (a.isUrgent ? -1 : 1));
+    res.json(sortedMessages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Use the routes from messageRouter
