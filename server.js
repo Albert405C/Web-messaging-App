@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 });
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost27017/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
