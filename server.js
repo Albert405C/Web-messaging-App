@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
 
 });
 
-// Endpoint to seed messages from CSV file
+
 // Endpoint to seed messages from CSV file
 app.get('/seed-messages', async (req, res) => {
   try {
@@ -88,7 +88,7 @@ app.get('/seed-messages', async (req, res) => {
 
 
 // Endpoint to get messages
-app.post('/messages', async (req, res) => {
+app.get('/messages', async (req, res) => {
   try {
     const messages = await Message.find();
     // Sort messages based on urgency (this is just an example, adjust as needed)
