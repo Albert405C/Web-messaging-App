@@ -20,6 +20,20 @@ function App() {
       setMessages(prevMessages => [...prevMessages, newMessage]);
     });
 
+    // Listen for 'assignedMessage' events from the server
+    socket.on('assignedMessage', (assignedMessage) => {
+      setMessages(prevMessages => prevMessages.map(message =>
+        (message._id === assignedMessage._id ? assignedMessage : message)
+      ));
+    });
+
+    // Listen for 'lockedMessage' events from the server
+    socket.on('lockedMessage', (lockedMessage) => {
+      setMessages(prevMessages => prevMessages.map(message =>
+        (message._id === lockedMessage._id ? lockedMessage : message)
+      ));
+    });
+
     return () => {
       // Disconnect the socket when the component unmounts
       socket.disconnect();
@@ -35,11 +49,21 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3000/messages', newMessage)
+    axios.post('http://localhost:3000/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ sender: '', content: '' });
       })
+      .catch(error => console.error(error));
+  };
+
+  const assignMessage = (messageId, agentId) => {
+    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
+      .catch(error => console.error(error));
+  };
+
+  const lockMessage = (messageId, agentId) => {
+    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
@@ -52,6 +76,22 @@ function App() {
             {messages.map(message => (
               <li key={message._id} className="list-group-item">
                 <strong>{message.sender}:</strong> {message.content}
+                {!message.assignedAgent && (
+                  <button
+                    className="btn btn-sm btn-success ms-2"
+                    onClick={() => assignMessage(message._id, 'agent123')} // Replace 'agent123' with the actual agent ID
+                  >
+                    Assign
+                  </button>
+                )}
+                {message.assignedAgent === 'agent123' && !message.lockedBy && (
+                  <button
+                    className="btn btn-sm btn-warning ms-2"
+                    onClick={() => lockMessage(message._id, 'agent123')} // Replace 'agent123' with the actual agent ID
+                  >
+                    Lock
+                  </button>
+                )}
               </li>
             ))}
           </ul>
@@ -60,20 +100,22 @@ function App() {
           {/* Form for sending new messages */}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label className="form-label">Sender:</label>
+              <label htmlFor="sender" className="form-label">Sender:</label>
               <input
                 type="text"
                 className="form-control"
+                id="sender"
                 name="sender"
                 value={newMessage.sender}
                 onChange={handleInputChange}
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Content:</label>
+              <label htmlFor="content" className="form-label">Content:</label>
               <input
                 type="text"
                 className="form-control"
+                id="content"
                 name="content"
                 value={newMessage.content}
                 onChange={handleInputChange}

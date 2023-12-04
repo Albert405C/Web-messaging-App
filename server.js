@@ -3,11 +3,15 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http');
 const socketIo = require('socket.io');
+const cors = require('cors');  // Import the cors middleware
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
+
+// Use CORS middleware
+app.use(cors());
 
 mongoose.connect('mongodb://localhost/branch-messaging-app', {
   useNewUrlParser: true,
@@ -19,6 +23,8 @@ const messageSchema = new mongoose.Schema({
   content: String,
   timestamp: { type: Date, default: Date.now },
   isRead: { type: Boolean, default: false },
+  assignedAgent: { type: String, default: null },
+  lockedBy: { type: String, default: null },
 });
 
 const Message = mongoose.model('Message', messageSchema);
@@ -49,8 +55,8 @@ app.get('/messages', async (req, res) => {
 });
 
 app.post('/messages', async (req, res) => {
-  const { sender, content } = req.body;
-  const newMessage = new Message({ sender, content });
+  const { sender, content, assignedAgent, lockedBy } = req.body;
+  const newMessage = new Message({ sender, content, assignedAgent, lockedBy });
   await newMessage.save();
 
   io.emit('newMessage', newMessage);
@@ -58,7 +64,16 @@ app.post('/messages', async (req, res) => {
   res.status(201).json(newMessage);
 });
 
+// Assign a message to an agent
+app.post('/messages/assign/:messageId/:agentId', async (req, res) => {
+  // ... (unchanged)
+});
+
+// Lock a message for an agent
+app.post('/messages/lock/:messageId/:agentId', async (req, res) => {
+  // ... (unchanged)
+});
+
 server.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
-
