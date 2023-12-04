@@ -16,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3001/messages')
+    axios.get('http://localhost:3000/messages')
       .then(response => setMessages(response.data))
       .catch(error => console.error(error));
 
@@ -54,7 +54,7 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3001/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
+    axios.post('http://localhost:3000/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ sender: '', content: '' });
@@ -63,12 +63,12 @@ function App() {
   };
 
   const assignMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3001/messages/assign/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
   const lockMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3001/messages/lock/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
