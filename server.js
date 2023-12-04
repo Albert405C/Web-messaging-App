@@ -12,11 +12,11 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
- cors: {
+  cors: {
     origin: 'http://localhost:3001',
     methods: ['GET', 'POST'],
     credentials: true,
- },
+  },
 });
 
 const port = 3000;
@@ -26,25 +26,25 @@ const filePath = 'C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv';
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use((req, res, next) => {
- res.header('Access-Control-Allow-Origin', '*');
- res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
- next();
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
 });
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
- .then(() => console.log('Connected to MongoDB'))
- .catch(err => console.error('Could not connect to MongoDB', err));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB', err));
 
 // Socket.io connection
 io.on('connection', (socket) => {
- console.log('Client connected');
+  console.log('Client connected');
 });
 
 // Seed messages
 const seedMessages = async () => {
- const messages = [];
- fs.createReadStream(filePath)
+  const messages = [];
+  fs.createReadStream(filePath)
     .pipe(csvParser())
     .on('data', (row) => {
       // Check if the required columns exist in the row
@@ -62,11 +62,15 @@ const seedMessages = async () => {
       }
     })
     .on('end', async () => {
-      const savedMessages = await Promise.all(messages.map(async (newMessage) => {
-        return await newMessage.save();
-      }));
-      await Message.insertMany(messages);
-      io.emit('seededMessages', messages);
+      try {
+        const savedMessages = await Promise.all(messages.map(async (newMessage) => {
+          return await newMessage.save();
+        }));
+        io.emit('seededMessages', savedMessages);
+        console.log('Messages seeded successfully');
+      } catch (error) {
+        console.error('Error seeding messages:', error);
+      }
     });
 };
 
@@ -76,5 +80,5 @@ seedMessages();
 app.use('/api', messageRouter);
 
 server.listen(port, () => {
- console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
