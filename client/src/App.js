@@ -3,7 +3,12 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3000');
+const socket = io('http://localhost:3001', {
+  withCredentials: true, // Add this line if needed
+  extraHeaders: {
+    "my-custom-header": "some-value" // Add any custom headers if needed
+  }
+});
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -11,7 +16,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
+    axios.get('http://localhost:3001/messages')
       .then(response => setMessages(response.data))
       .catch(error => console.error(error));
 
@@ -49,7 +54,7 @@ function App() {
     e.preventDefault();
 
     // Simulate sending a message to the server
-    axios.post('http://localhost:3000/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
+    axios.post('http://localhost:3001/messages', { ...newMessage, assignedAgent: null, lockedBy: null })
       .then(response => {
         // Clear the form and let Socket.IO handle real-time updates
         setNewMessage({ sender: '', content: '' });
@@ -58,12 +63,12 @@ function App() {
   };
 
   const assignMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/assign/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3001/messages/assign/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
   const lockMessage = (messageId, agentId) => {
-    axios.post(`http://localhost:3000/messages/lock/${messageId}/${agentId}`)
+    axios.post(`http://localhost:3001/messages/lock/${messageId}/${agentId}`)
       .catch(error => console.error(error));
   };
 
@@ -100,22 +105,20 @@ function App() {
           {/* Form for sending new messages */}
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
-              <label htmlFor="sender" className="form-label">Sender:</label>
+              <label className="form-label">Sender:</label>
               <input
                 type="text"
                 className="form-control"
-                id="sender"
                 name="sender"
                 value={newMessage.sender}
                 onChange={handleInputChange}
               />
             </div>
             <div className="mb-3">
-              <label htmlFor="content" className="form-label">Content:</label>
+              <label className="form-label">Content:</label>
               <input
                 type="text"
                 className="form-control"
-                id="content"
                 name="content"
                 value={newMessage.content}
                 onChange={handleInputChange}

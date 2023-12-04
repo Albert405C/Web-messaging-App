@@ -3,15 +3,15 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const http = require('http');
 const socketIo = require('socket.io');
-const cors = require('cors');  // Import the cors middleware
+const cors = require('cors');
 
 const app = express();
 const port = 3000;
 
-app.use(bodyParser.json());
-
-// Use CORS middleware
+// Use CORS middleware for the entire app
 app.use(cors());
+
+app.use(bodyParser.json());
 
 mongoose.connect('mongodb://localhost/branch-messaging-app', {
   useNewUrlParser: true,
@@ -66,12 +66,44 @@ app.post('/messages', async (req, res) => {
 
 // Assign a message to an agent
 app.post('/messages/assign/:messageId/:agentId', async (req, res) => {
-  // ... (unchanged)
+  const { messageId, agentId } = req.params;
+  const message = await Message.findById(messageId);
+
+  if (!message) {
+    return res.status(404).json({ error: 'Message not found' });
+  }
+
+  if (message.lockedBy && message.lockedBy !== agentId) {
+    return res.status(403).json({ error: 'Message is locked by another agent' });
+  }
+
+  message.assignedAgent = agentId;
+  await message.save();
+
+  io.emit('assignedMessage', message);
+
+  res.json(message);
 });
 
 // Lock a message for an agent
 app.post('/messages/lock/:messageId/:agentId', async (req, res) => {
-  // ... (unchanged)
+  const { messageId, agentId } = req.params;
+  const message = await Message.findById(messageId);
+
+  if (!message) {
+    return res.status(404).json({ error: 'Message not found' });
+  }
+
+  if (message.assignedAgent !== agentId) {
+    return res.status(403).json({ error: 'Message is not assigned to the requesting agent' });
+  }
+
+  message.lockedBy = agentId;
+  await message.save();
+
+  io.emit('lockedMessage', message);
+
+  res.json(message);
 });
 
 server.listen(port, () => {
