@@ -8,8 +8,9 @@ const socketIo = require('socket.io');
 const PORT = process.env.PORT || 3000;
 const port = 3000;
 const app = express();
+const path = require ('path');
+const filePath = path.join(__dirname, 'UsersADMINOneDrive Documents', 'messages.csv');
 
-const filePath = 'C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDrive Documents\\messages.csv';
 
 app.use(bodyParser.json());
 app.use((req, res, next) => {
@@ -50,7 +51,7 @@ io.on('connection', (socket) => {
 
 const seedMessages = async () => {
   const messages = [];
-  fs.createReadStream(filePath)  // Use the correct file path variable
+  fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")  // Use the correct file path variable
     .pipe(csvParser())
     .on('data', (row) => {
       const newMessage = new Message({
