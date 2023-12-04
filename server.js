@@ -7,13 +7,14 @@ const messageRouter = require('./messageRouter');
 const Message = require('./messageModel');
 const fs = require('fs');
 const csvParser = require('csv-parser');
-
+const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
+app.use(cors({ origin: 'http://localhost:3001' }));
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3001',
     methods: ['GET', 'POST'],
     credentials: true,
   },
