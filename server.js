@@ -9,7 +9,7 @@ const port = 3000;
 
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost/branch-messaging-app', {
+mongoose.connect('mongodb://localhost/Messaging-Web-App', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
