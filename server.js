@@ -10,7 +10,7 @@ const csvParser = require('csv-parser');
 const cors = require('cors');
 const PORT = process.env.PORT || 3000;
 const app = express();
-const messageRouter = require('./messageRouter.js');
+
 const server = http.createServer(app);
 app.use(cors({ origin: 'http://localhost:3001' }));
 const io = socketIo(server, {
