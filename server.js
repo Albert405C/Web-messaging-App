@@ -7,7 +7,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 const app = express();
-const port = process.env.PORT || 5000;
+
 
 app.use(bodyParser.json());
 
@@ -52,7 +52,7 @@ const seedMessages = async () => {
  });
 
  fs.createReadStream("C:\Users\ADMIN\OneDrive\Documents\messages.csv")
-    .pipe(parser())
+    .pipe(csvParser())
     .on('data', (row) => {
       const newMessage = new Message({
         sender: row.sender,
