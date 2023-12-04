@@ -5,6 +5,7 @@ const csvParser = require('csv-parser');
 const fs = require('fs');
 const http = require('http');
 const socketIo = require('socket.io');
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
