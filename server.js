@@ -88,7 +88,7 @@ app.get('/seed-messages', async (req, res) => {
 
 
 // Endpoint to get messages
-app.get('/messages', async (req, res) => {
+app.post('/messages', async (req, res) => {
   try {
     const messages = await Message.find();
     // Sort messages based on urgency (this is just an example, adjust as needed)
