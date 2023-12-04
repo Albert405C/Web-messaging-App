@@ -16,18 +16,26 @@ function App() {
   const [newMessage, setNewMessage] = useState({ sender: '', content: '' });
 
   useEffect(() => {
+    console.log('Messages:', messages);
     // Fetch initial messages from the server
     axios.get('http://localhost:3000/messages')
-      .then(response => setMessages(response.data))
-      .catch(error => console.error(error));
+    .then(response => {
+      console.log('Received messages from server:', response.data);
+      setMessages(response.data);
+    })
+    .catch(error => console.error(error));
+      
 
+  
     // Listen for 'newMessage' events from the server
     socket.on('newMessage', (newMessage) => {
+      console.log('Received new message:', newMessage);
       setMessages(prevMessages => [newMessage, ...prevMessages]);
     });
 
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
+      console.log('Received seeded messages:', seededMessages);
       // Update the state with the seeded messages
       setMessages(seededMessages);
     });
