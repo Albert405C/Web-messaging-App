@@ -18,6 +18,9 @@ const io = socketIo(server, {
     credentials: true,
   },
 });
+const messageModel = require('./messageModel');
+messageModel.initializeSocketListener(io);
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
