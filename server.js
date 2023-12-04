@@ -20,7 +20,8 @@ mongoose.connect('mongodb://localhost/Messaging-Web-App', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-fs.createReadStream('C:\Users\ADMIN\OneDrive\Desktop\Messaging Web App\Messages\GeneralistRails_Project_MessageData_1 (2).csv')
+
+fs.createReadStream('C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\UsersADMINOneDriveDesktopMessaging Web App\\MessagesGeneralistRails_Project_MessageData_1 (2).csv')
   .pipe(csv())
   .on('data', async (row) => {
     // Save each row as a message in the database
@@ -30,6 +31,7 @@ fs.createReadStream('C:\Users\ADMIN\OneDrive\Desktop\Messaging Web App\Messages\
   .on('end', () => {
     console.log('CSV file successfully processed and messages imported.');
   });
+
 const messageSchema = new mongoose.Schema({
   sender: String,
   content: String,
@@ -46,17 +48,7 @@ io.on('connection', (socket) => {
   console.log('Client connected');
 });
 
-const seedMessages = async () => {
-  for (let i = 1; i <= 50; i++) {
-    const newMessage = new Message({
-      sender: `Customer ${i}`,
-      content: `This is message number ${i}`,
-    });
-    await newMessage.save();
-  }
-};
 
-seedMessages();
 
 app.get('/messages', async (req, res) => {
   // Set CORS headers in the response
