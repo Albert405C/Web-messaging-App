@@ -8,7 +8,7 @@ const Message = require('./messageModel');
 const fs = require('fs');
 const csvParser = require('csv-parser');
 const cors = require('cors');
-
+const messageRouter = require('./messageRouter.js');
 const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
