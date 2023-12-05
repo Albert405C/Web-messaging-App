@@ -41,57 +41,63 @@ mongoose.connect('mongodb://localhost:27017/messaging_app', { useNewUrlParser: t
             timestamp: new Date(),
             status: 'unassigned',
         };
-        const seedMessages = async () => {
-          const data = [];
-        
-          try {
-            const stream = fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
-              .pipe(parse({ delimiter: ",", from_line: 2 }))
-              .on("data", async function (row) {
-                try {
-                  const userId = row[0].toString();
-                  const timestamp = new Date(row[1]);
-                  const messageBody = row[2];
-        
-                  // Find or create the user based on userID
-                  let user = await User.findOne({ userID: userId });
-        
-                  if (!user) {
-                    user = new User({ userID: userId });
-                    await user.save();
-                  }
-        
-                  // Create the message data
-                  const messageData = {
-                    text: messageBody,
-                    sender: new mongoose.Types.ObjectId(user._id),
-                    conversation: new mongoose.Types.ObjectId(),
-                    timestamp: new Date(),
-                    status: 'unassigned',
-                  };
-        
-                  data.push(messageData);
-                } catch (error) {
-                  console.error("Error processing CSV row:", error);
-                }
-              })
-              .on("error", function (error) {
-                console.log("CSV Parsing Error:", error.message);
-              })
-              .on("end", async function () {
-                try {
-                  await Message.insertMany(data);
-                  console.log("CSV data saved to MongoDB");
-                } catch (error) {
-                  console.error("Error saving CSV data to MongoDB:", error);
-                }
-              });
-        
-            await new Promise((resolve) => stream.on("end", resolve));
-          } catch (error) {
-            console.error("Error reading CSV file:", error);
+       // CSV Parsing and Saving to MongoDB
+const seedMessages = async () => {
+  const data = [];
+
+  try {
+    const stream = fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
+      .pipe(parse({ delimiter: ",", from_line: 2 }));
+
+    let messageBody;  // Declare messageBody here
+
+    stream
+      .on("data", async function (row) {
+        try {
+          const userId = row[0].toString();
+          const timestamp = new Date(row[1]);
+          messageBody = row[2];  // Assign value to messageBody
+
+          // Find or create the user based on userID
+          let user = await User.findOne({ userID: userId });
+
+          if (!user) {
+            user = new User({ userID: userId });
+            await user.save();
           }
-        };
+
+          // Create the message data
+          const messageData = {
+            text: messageBody,
+            sender: new mongoose.Types.ObjectId(user._id),
+            conversation: new mongoose.Types.ObjectId(),
+            timestamp: new Date(),
+            status: 'unassigned',
+          };
+
+          data.push(messageData);
+        } catch (error) {
+          console.error("Error processing CSV row:", error);
+        }
+      })
+      .on("error", function (error) {
+        console.log("CSV Parsing Error:", error.message);
+      })
+      .on("end", async function () {
+        try {
+          await Message.insertMany(data);
+          console.log("CSV data saved to MongoDB");
+        } catch (error) {
+          console.error("Error saving CSV data to MongoDB:", error);
+        }
+      });
+
+    await new Promise((resolve) => stream.on("end", resolve));
+  } catch (error) {
+    console.error("Error reading CSV file:", error);
+  }
+};
+
         
           
 
