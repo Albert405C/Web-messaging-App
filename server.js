@@ -106,7 +106,7 @@ io.on('connection', (socket) => {
 // Endpoint to fetch messages from the "messaging_app" database
 app.get('/messages', async (req, res) => {
   try {
-    const messages = await Message.find();
+    const messages = await User.find(); // Fetch messages from the "users" collection
     // Sort messages or perform any other processing as needed
     res.json(messages);
   } catch (error) {
@@ -114,6 +114,7 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 app.use('/', messageRouter);

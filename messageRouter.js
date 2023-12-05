@@ -1,6 +1,7 @@
-const express = require('express');
-const  { Message } = require("C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\messageModel.js");
+// messageRouter.js
 
+const express = require('express');
+const { Message } = require("C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\messageModel.js");
 const router = express.Router();
 
 // GET all messages
@@ -12,7 +13,6 @@ router.get('/messages', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-// Add this route in your messageRouter.js
 
 // POST a new customer message
 router.post('/customer/messages', async (req, res) => {
@@ -30,9 +30,6 @@ router.post('/customer/messages', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-// ... (existing code)
-
 
 // PUT a new response to a message
 router.put('/messages/:id', async (req, res) => {
