@@ -28,7 +28,7 @@ function App() {
         setError('Error fetching messages');
         setLoading(false);
       });
-  
+
     // Listen for 'messageAdded' events from the server
     socket.on('messageAdded', (newMessage) => {
       setMessages(prevMessages => [newMessage, ...prevMessages]);
@@ -39,8 +39,6 @@ function App() {
       console.log('Received seededMessages:', seededMessages);
       setMessages(seededMessages);
     });
-
-    
 
     return () => {
       // Disconnect the socket when the component unmounts
@@ -66,28 +64,6 @@ function App() {
     setNewMessage({ userId: '', messageBody: '' });
   };
 
-  // ... (existing code)
-
-const handleAssignMessage = (messageId, agentId) => {
-  // Emit 'lockMessage' event to the server
-  socket.emit('lockMessage', messageId, (lockResponse) => {
-    if (lockResponse.success) {
-      // Message is locked, proceed with assignment
-      socket.emit('assignMessage', { messageId, agentId }, (response) => {
-        if (response.success) {
-          console.log('Message assigned successfully');
-        } else {
-          console.error('Error assigning message:', response.error);
-        }
-      });
-    } else {
-      // Message is already locked, show a prompt or handle accordingly
-      console.error('Error locking message:', lockResponse.error);
-    }
-  });
-};
-
-
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Branch Messaging App</h1>
@@ -104,11 +80,7 @@ const handleAssignMessage = (messageId, agentId) => {
                   <strong>{message.userId}:</strong> {message.messageBody}
                   {message.agentId ? (
                     <span className="assigned-message">Assigned to Agent {message.agentId}</span>
-                  ) : (
-                    <button onClick={() => handleAssignMessage(message._id, 'AGENT_ID')}>
-                      Assign to Agent
-                    </button>
-                  )}
+                  ) : null}
                 </li>
               ))}
             </ul>

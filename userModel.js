@@ -7,9 +7,17 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  // Other user schema fields...
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+  messageBody: {
+    type: String,
+    required: true,
+  },
+  // Add other fields as needed...
 });
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+module.exports = { User };

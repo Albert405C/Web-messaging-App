@@ -32,7 +32,7 @@ mongoose.connect('mongodb://localhost:27017/messaging_app', { useNewUrlParser: t
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 // CSV Parsing and Saving to MongoDB
-const seedMessages = async () => {
+const seedUsers = async () => {
   const data = [];
 
   return new Promise((resolve, reject) => {
@@ -44,24 +44,14 @@ const seedMessages = async () => {
           const timestamp = new Date(row[1]);
           const messageBody = row[2];
 
-          // Find or create the user based on userID
-          let user = await User.findOne({ userID: userId });
+          // Create the user data
+          const userData = {
+            userID: userId,
+            timestamp: timestamp,
+            messageBody: messageBody,
+          };
 
-          if (!user) {
-            user = new User({ userID: userId });
-            await user.save();
-          }
-
-          // Create the message data
-          const messageData = {
-            text: messageBody,
-            sender: new mongoose.Types.ObjectId(user._id), // Use the ObjectId of the found or created user
-            conversation: new mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
-            timestamp: new Date(),
-            status: 'unassigned',
-        };
-        
-          data.push(messageData);
+          data.push(userData);
         } catch (error) {
           console.error("Error processing CSV row:", error);
           reject(error);
@@ -73,7 +63,8 @@ const seedMessages = async () => {
       })
       .on("end", async function () {
         try {
-          await Message.insertMany(data);
+          // Insert users into the 'users' collection
+          await User.insertMany(data);
           console.log("CSV data saved to MongoDB");
           resolve(data);
         } catch (error) {
@@ -84,7 +75,24 @@ const seedMessages = async () => {
   });
 };
 
+// Call the seedUsers function to insert user data
+seedUsers();
+
 // Socket.io connection
+// ... (existing code)
+
+// Endpoint to fetch users from the "messaging_app" database
+app.get('/users', async (req, res) => {
+  try {
+    const users = await User.find(); // Fetch users from the "users" collection
+    // Sort users or perform any other processing as needed
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // ... (existing code)
 
 // Socket.io connection
@@ -102,12 +110,11 @@ io.on('connection', (socket) => {
   // ... (existing code)
 });
 
-
 // Endpoint to fetch messages from the "messaging_app" database
 app.get('/messages', async (req, res) => {
   try {
-    const messages = await User.find(); // Fetch messages from the "users" collection
-    // Sort messages or perform any other processing as needed
+    const messages = await User.find(); // Fetch users from the "users" collection
+    // Sort users or perform any other processing as needed
     res.json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
@@ -115,9 +122,7 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-
-
 app.use('/', messageRouter);
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-}); 
+});
