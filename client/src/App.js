@@ -35,11 +35,9 @@ function App() {
     });
 
     // Listen for 'seededMessages' events from the server
-   // ...
-socket.on('seededMessages', (seededMessages) => {
-  setMessages(prevMessages => [...seededMessages, ...prevMessages]);
- });
- // ...
+    socket.on('seededMessages', (seededMessages) => {
+      setMessages(seededMessages);
+    });
 
     // Listen for 'messageAssigned' events from the server
     socket.on('messageAssigned', ({ messageId, agentId }) => {
