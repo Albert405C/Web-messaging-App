@@ -53,14 +53,14 @@ const seedMessages = async () => {
           }
 
           // Create the message data
-          const messageData = {
-            text: messageBody,
-            sender: new mongoose.Types.ObjectId(user._id), // Use the ObjectId of the found or created user
-            conversation: new mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
-            timestamp: new Date(),
-            status: 'unassigned',
-        };
-        
+        const messageData = {
+    text: messageBody,
+    sender: new mongoose.Types.ObjectId(user._id), // Use the ObjectId of the found or created user
+    conversation: new mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
+    timestamp: timestamp,
+    status: 'unassigned',
+};
+
           data.push(messageData);
         } catch (error) {
           console.error("Error processing CSV row:", error);

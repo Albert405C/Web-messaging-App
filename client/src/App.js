@@ -1,3 +1,4 @@
+// client/src/App.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
@@ -18,7 +19,8 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
+    axios.get('http://localhost:3000/messages_app')
+
       .then(response => {
         setMessages(response.data);
         setLoading(false);
@@ -63,14 +65,16 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Emit 'newMessage' event to the server
-    socket.emit('newMessage', { ...newMessage }, (response) => {
-      // Handle the acknowledgment from the server (if needed)
-      console.log(response);
-    });
-
-    // Clear the form
-    setNewMessage({ userId: '', messageBody: '' });
+    // Simulate sending a message to the server
+    axios.post('http://localhost:3000', { ...newMessage })
+      .then(response => {
+        // Clear the form and let Socket.IO handle real-time updates
+        setNewMessage({ userId: '', messageBody: '' });
+      })
+      .catch(error => {
+        console.error(error);
+        setError('Error sending the message');
+      });
   };
 
   return (
