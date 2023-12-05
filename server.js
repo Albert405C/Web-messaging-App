@@ -112,7 +112,7 @@ app.get('/messages', async (req, res) => {
   }
 });
 
-// Use the routes from messageRouter
+
 app.use('/', messageRouter);
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
