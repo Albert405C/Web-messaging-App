@@ -32,8 +32,6 @@ mongoose.connect('mongodb://localhost:27017/messaging_app', { useNewUrlParser: t
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 // CSV Parsing and Saving to MongoDB
-const fs = require('fs');
-const csv = require('csv-parser');
 
 const seedMessages = async () => {
   const messages = [];
