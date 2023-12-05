@@ -12,23 +12,27 @@ router.get('/messages', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+// Add this route in your messageRouter.js
 
-// POST a new message
-router.post('/messages', async (req, res) => {
-  const message = new Message({
-    customer_name: req.body.customer_name,
-    customer_email: req.body.customer_email,
-    message: req.body.message,
+// POST a new customer message
+router.post('/customer/messages', async (req, res) => {
+  const customerMessage = new Message({
+    text: req.body.text,
     timestamp: new Date(),
+    status: 'unassigned',
   });
 
   try {
-    const savedMessage = await message.save();
+    const savedMessage = await customerMessage.save();
+    io.emit('messageAdded', savedMessage);
     res.json(savedMessage);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+// ... (existing code)
+
 
 // PUT a new response to a message
 router.put('/messages/:id', async (req, res) => {

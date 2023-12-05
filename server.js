@@ -85,20 +85,23 @@ const seedMessages = async () => {
 };
 
 // Socket.io connection
+// ... (existing code)
+
+// Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  // Emit 'seededMessages' event after saving CSV data to MongoDB
-  seedMessages()
-    .then((seededMessages) => {
-      io.emit('seededMessages', seededMessages);
-    })
-    .catch((error) => {
-      console.error('Error seeding messages:', error);
-    });
+  // ... (existing code)
 
-  // Rest of your existing socket.io connection handling code
+  // Listen for 'messageAdded' event from the client
+  socket.on('newMessage', (newMessage) => {
+    // ... (existing code)
+    io.emit('messageAdded', newMessage);
+  });
+
+  // ... (existing code)
 });
+
 
 // Endpoint to fetch messages from the "messaging_app" database
 app.get('/messages', async (req, res) => {

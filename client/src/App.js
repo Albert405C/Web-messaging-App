@@ -28,7 +28,7 @@ function App() {
         setError('Error fetching messages');
         setLoading(false);
       });
-
+  
     // Listen for 'messageAdded' events from the server
     socket.on('messageAdded', (newMessage) => {
       setMessages(prevMessages => [newMessage, ...prevMessages]);
@@ -66,17 +66,27 @@ function App() {
     setNewMessage({ userId: '', messageBody: '' });
   };
 
-  const handleAssignMessage = (messageId, agentId) => {
-    // Emit 'assignMessage' event to the server
-    socket.emit('assignMessage', { messageId, agentId }, (response) => {
-      // Handle the acknowledgment from the server
-      if (response.success) {
-        console.log('Message assigned successfully');
-      } else {
-        console.error('Error assigning message:', response.error);
-      }
-    });
-  };
+  // ... (existing code)
+
+const handleAssignMessage = (messageId, agentId) => {
+  // Emit 'lockMessage' event to the server
+  socket.emit('lockMessage', messageId, (lockResponse) => {
+    if (lockResponse.success) {
+      // Message is locked, proceed with assignment
+      socket.emit('assignMessage', { messageId, agentId }, (response) => {
+        if (response.success) {
+          console.log('Message assigned successfully');
+        } else {
+          console.error('Error assigning message:', response.error);
+        }
+      });
+    } else {
+      // Message is already locked, show a prompt or handle accordingly
+      console.error('Error locking message:', lockResponse.error);
+    }
+  });
+};
+
 
   return (
     <div className="container mt-4">
