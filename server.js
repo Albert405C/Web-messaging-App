@@ -90,12 +90,15 @@ io.on('connection', (socket) => {
 
   // Emit 'seededMessages' event after saving CSV data to MongoDB
   seedMessages()
-    .then((seededMessages) => {
-      io.emit('seededMessages', seededMessages);
-    })
-    .catch((error) => {
-      console.error('Error seeding messages:', error);
-    });
+      .then((seededMessages) => {
+        io.emit('seededMessages', seededMessages);
+        console.log('Emitted seededMessages:', seededMessages);
+        isDataSeeded = true;
+      })
+      .catch((error) => {
+        console.error('Error seeding messages:', error);
+      });
+  
 
   // Rest of your existing socket.io connection handling code
 });

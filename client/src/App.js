@@ -36,6 +36,7 @@ function App() {
 
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
+      console.log('Received seededMessages:', seededMessages);
       setMessages(seededMessages);
     });
 
