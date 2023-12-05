@@ -83,12 +83,7 @@ const seedMessages = async () => {
       });
   });
 };
-// ...
-socket.on('seededMessages', (seededMessages) => {
-  console.log('Received messages:', seededMessages);
-  setMessages(prevMessages => [...seededMessages, ...prevMessages]);
- });
- // ...
+
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
