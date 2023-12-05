@@ -39,6 +39,7 @@ function App() {
       console.log('Received seededMessages:', seededMessages);
       setMessages(seededMessages);
     });
+
     // Listen for 'messageAssigned' events from the server
     socket.on('messageAssigned', ({ messageId, agentId }) => {
       // Update the UI to reflect the assigned message
@@ -73,6 +74,18 @@ function App() {
     setNewMessage({ userId: '', messageBody: '' });
   };
 
+  const handleAssignMessage = (messageId, agentId) => {
+    // Emit 'assignMessage' event to the server
+    socket.emit('assignMessage', { messageId, agentId }, (response) => {
+      // Handle the acknowledgment from the server
+      if (response.success) {
+        console.log('Message assigned successfully');
+      } else {
+        console.error('Error assigning message:', response.error);
+      }
+    });
+  };
+
   return (
     <div className="container mt-4">
       <h1 className="mb-4">Branch Messaging App</h1>
@@ -87,7 +100,13 @@ function App() {
               {messages.map(message => (
                 <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
                   <strong>{message.userId}:</strong> {message.messageBody}
-                  {message.agentId && <span className="assigned-message">Assigned to Agent {message.agentId}</span>}
+                  {message.agentId ? (
+                    <span className="assigned-message">Assigned to Agent {message.agentId}</span>
+                  ) : (
+                    <button onClick={() => handleAssignMessage(message._id, 'AGENT_ID')}>
+                      Assign to Agent
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

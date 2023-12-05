@@ -20,14 +20,12 @@ const initializeSocketListener = (socket, io) => {
       const { messageId, agentId } = data;
   
       try {
-        // Check if the message exists
         const message = await Message.findById(messageId);
   
         if (!message) {
           return callback({ error: 'Message not found' });
         }
   
-        // Check if the agent (user) exists
         const isAgentExists = await User.exists({ userID: agentId });
   
         if (!isAgentExists) {
@@ -35,28 +33,29 @@ const initializeSocketListener = (socket, io) => {
         }
   
         if (message.status === 'unassigned') {
-          // Use $set to update specific fields without affecting others
+          // Use async/await directly on updateOne
           await message.updateOne({ $set: { status: 'assigned', agentId: agentId } });
   
           io.emit('messageAssigned', { messageId, agentId });
   
           callback({ success: true });
         } else {
-          // Message is already assigned or completed
           callback({ error: 'Message already assigned or completed' });
         }
       } catch (error) {
         console.error('Error assigning message:', error);
   
         if (error.code === 11000) {
-          // Handle duplicate key error (unique constraint violation) for 'userID'
-          return callback({ error: 'Agent with the same userID already exists' });
+          callback({ error: 'Agent with the same userID already exists' });
+        } else {
+          callback({ error: 'Internal server error', details: error.message });
         }
-  
-        callback({ error: 'Internal server error', details: error.message });
       }
     });
   };
+  
+  module.exports = { Message, User, initializeSocketListener };
+  
   
   module.exports = { Message, User, initializeSocketListener };
   
