@@ -57,7 +57,7 @@ const seedMessages = async () => {
             text: messageBody,
             sender: new mongoose.Types.ObjectId(user._id), // Use the ObjectId of the found or created user
             conversation: new mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
-            timestamp: timestamp,
+            timestamp: new Date(),
             status: 'unassigned',
         };
         
@@ -90,15 +90,12 @@ io.on('connection', (socket) => {
 
   // Emit 'seededMessages' event after saving CSV data to MongoDB
   seedMessages()
-      .then((seededMessages) => {
-        io.emit('seededMessages', seededMessages);
-        console.log('Emitted seededMessages:', seededMessages);
-        isDataSeeded = true;
-      })
-      .catch((error) => {
-        console.error('Error seeding messages:', error);
-      });
-  
+    .then((seededMessages) => {
+      io.emit('seededMessages', seededMessages);
+    })
+    .catch((error) => {
+      console.error('Error seeding messages:', error);
+    });
 
   // Rest of your existing socket.io connection handling code
 });
