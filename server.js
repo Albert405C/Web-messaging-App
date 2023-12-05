@@ -35,7 +35,7 @@ const seedMessages = async () => {
   const data = [];
 
   return new Promise((resolve, reject) => {
-    fs.createReadStream("./messages.csv")
+    fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
       .pipe(parse({ delimiter: ",", from_line: 2 }))
       .on("data", function (row) {
         data.push(row);
