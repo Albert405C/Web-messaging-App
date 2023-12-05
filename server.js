@@ -70,16 +70,7 @@ const seedMessages = async () => {
 // ... (existing code)
 
 // Endpoint to fetch users from the "messaging_app" database
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find(); // Fetch users from the "users" collection
-    // Sort users or perform any other processing as needed
-    res.json(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+
 
 // ... (existing code)
 
