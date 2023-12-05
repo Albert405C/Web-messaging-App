@@ -1,15 +1,24 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-const messageSchema = new Schema({
- text: { type: String, required: true },
- sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
- conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
- timestamp: { type: Date, default: Date.now },
- status: { type: String, default: 'unassigned' }, 
+// Define the User schema
+const userSchema = new Schema({
+  userID: { type: Number, required: true },
+  
 });
 
-const Message = mongoose.model('Message', messageSchema , 'messages');
+const User = mongoose.model('User', userSchema);
+
+// Define the Message schema
+const messageSchema = new Schema({
+  text: { type: String, required: true },
+  sender: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  conversation: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
+  timestamp: { type: Date, default: Date.now },
+  status: { type: String, default: 'unassigned' },
+});
+
+const Message = mongoose.model('Message', messageSchema, 'messages');
 
 // Define a function that takes 'socket' and 'io' as parameters
 const initializeSocketListener = (socket, io) => {
@@ -41,4 +50,4 @@ const initializeSocketListener = (socket, io) => {
   });
 };
 
-module.exports = Message;
+module.exports = { Message, User, initializeSocketListener };
