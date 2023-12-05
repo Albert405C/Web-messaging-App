@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
+const { User } = require('./userModel');
 
 // Define the Message schema
 const messageSchema = new Schema({
