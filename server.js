@@ -8,11 +8,10 @@ const Message = require('./messageModel');
 const fs = require('fs');
 const csvParser = require('csv-parser');
 const cors = require('cors');
+
 const PORT = process.env.PORT || 3000;
 const app = express();
-const messageRouter = require('./messageRouter.js');
 const server = http.createServer(app);
-app.use(cors({ origin: 'http://localhost:3001' }));
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3001',
@@ -22,121 +21,65 @@ const io = socketIo(server, {
 });
 
 // Middleware
+app.use(cors({ origin: 'http://localhost:3001' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
-  fs.createReadStream("./example.csv")
-  .pipe(parse({ delimiter: ",", from_line: 2 }))
-  .on("data", function (row) {
-    console.log(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  })
-  .on("end", function () {
-    console.log("finished");
+
+// CSV Parsing and Saving to MongoDB
+const seedMessages = async () => {
+  const data = [];
+
+  return new Promise((resolve, reject) => {
+    fs.createReadStream("./example.csv")
+      .pipe(parse({ delimiter: ",", from_line: 2 }))
+      .on("data", function (row) {
+        data.push(row);
+      })
+      .on("error", function (error) {
+        console.log(error.message);
+        reject(error);
+      })
+      .on("end", async function () {
+        try {
+          const messages = data.map((row) => ({
+            customer_name: row[0].toString(),
+            message: row[2],
+            timestamp: new Date(row[1]),
+          }));
+
+          await Message.insertMany(messages);
+          console.log("CSV data saved to MongoDB");
+          resolve(messages);
+        } catch (error) {
+          console.error("Error saving CSV data to MongoDB:", error);
+          reject(error);
+        }
+      });
   });
-  .on("data", function (row) {
-    // This will push the object row into the array
-    data.push(row);
-  })
-  .on("error", function (error) {
-    console.log(error.message);
-  })
-  .on("end", function () {
-    // Here log the result array
-    console.log("parsed csv data:");
-    console.log(data);
-  });
+};
+
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
 
-  // Socket event handler for new messages
-  socket.on('newMessage', async (data, callback) => {
-    const { userId, messageBody } = data;
-
-    if (!userId || !messageBody) {
-      return console.error('Invalid message data');
-    }
-
-    const newMessage = new Message({
-      customer_name: userId.toString(),
-      customer_email: '', // You can leave customer_email empty or set it based on your data
-      message: messageBody,
-      timestamp: new Date(),
+  // Emit 'seededMessages' event after saving CSV data to MongoDB
+  seedMessages()
+    .then((seededMessages) => {
+      io.emit('seededMessages', seededMessages);
+    })
+    .catch((error) => {
+      console.error('Error seeding messages:', error);
     });
-
-    // Implement basic authentication
-    if (!socket.handshake.session.loggedIn) {
-      return callback({ error: 'Unauthorized access' });
-    }
-
-    try {
-      await newMessage.save();
-      io.emit('messageAdded', newMessage);
-      callback({ success: true });
-    } catch (error) {
-      console.error('Error saving message:', error);
-      callback({ error: 'Internal server error' });
-    }
-  });
-
-  // Socket event handler for assigning messages to agents
-  socket.on('assignMessage', async (data, callback) => {
-    const { messageId, agentId } = data;
-
-    try {
-      const message = await Message.findById(messageId);
-
-      if (!message) {
-        return callback({ error: 'Message not found' });
-      }
-
-      if (message.status === 'unassigned') {
-        // Assign the message to the agent
-        message.status = 'assigned';
-        message.agentId = agentId;
-
-        await message.save();
-        io.emit('messageAssigned', { messageId, agentId });
-
-        callback({ success: true });
-      } else {
-        // Message is already assigned or completed
-        callback({ error: 'Message already assigned or completed' });
-      }
-    } catch (error) {
-      console.error('Error assigning message:', error);
-      callback({ error: 'Internal server error' });
-    }
-  });
 
   // Rest of your existing socket.io connection handling code
 });
 
-// Endpoint to seed messages from CSV file
-app.get('/seed-messages', async (req, res) => {
-  try {
-    const seededMessages = await seedMessages();  // Assuming seedMessages returns the seeded messages
-    io.emit('seededMessages', seededMessages);  // Emit the 'seededMessages' event to connected clients
-    res.json({ success: true, message: 'Messages seeded successfully' });
-  } catch (error) {
-    console.error('Error seeding messages:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Endpoint to get messages
+// Endpoint to fetch messages from the database
 app.get('/messages', async (req, res) => {
   try {
     const messages = await Message.find();
@@ -148,10 +91,8 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 // Use the routes from messageRouter
 app.use('/', messageRouter);
-
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
