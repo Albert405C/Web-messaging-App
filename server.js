@@ -38,7 +38,7 @@ const seedMessages = async () => {
 
   // Read the CSV file
   fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
-    .pipe(csv({ separator: '\t' })) // Adjust the separator based on your CSV file
+    .pipe(csv-parse({ separator: '\t' })) // Adjust the separator based on your CSV file
     .on('data', (row) => {
       // Process each row from the CSV file
       const newMessage = new Message({
