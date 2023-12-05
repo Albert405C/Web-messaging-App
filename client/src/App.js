@@ -3,7 +3,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:3000', {
   withCredentials: true,
   extraHeaders: {
     "my-custom-header": "some-value"
@@ -59,10 +59,7 @@ function App() {
     const { name, value } = e.target;
     setNewMessage(prevMessage => ({ ...prevMessage, [name]: value }));
   };
-  console.log('Before setting state:', messages);
-  setMessages(updatedMessages);
-  console.log('After setting state:', updatedMessages);
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
