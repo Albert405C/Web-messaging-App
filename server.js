@@ -5,7 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { parse } = require("csv-parse");
 
-const User = require("C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\userModel.js"); // Import the User model
+
 const fs = require('fs');
 const csvParser = require('csv-parser');
 const cors = require('cors');
@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/messaging_app', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb://localhost:27017/messaging', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB', err));
 
