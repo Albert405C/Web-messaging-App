@@ -1,5 +1,6 @@
 // userModel.js
 const mongoose = require('mongoose');
+const { User } = require('./userModel.js');
 
 const userSchema = new mongoose.Schema({
   userID: {
