@@ -59,7 +59,10 @@ function App() {
     const { name, value } = e.target;
     setNewMessage(prevMessage => ({ ...prevMessage, [name]: value }));
   };
-
+  console.log('Before setting state:', messages);
+  setMessages(updatedMessages);
+  console.log('After setting state:', updatedMessages);
+  
   const handleSubmit = (e) => {
     e.preventDefault();
 
