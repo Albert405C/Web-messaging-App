@@ -5,6 +5,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const { parse } = require("csv-parse");
 const Message = require('./messageModel');
+const User = require('./userModel'); // Import the User model
 const fs = require('fs');
 const csvParser = require('csv-parser');
 const cors = require('cors');
@@ -37,8 +38,34 @@ const seedMessages = async () => {
   return new Promise((resolve, reject) => {
     fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
       .pipe(parse({ delimiter: ",", from_line: 2 }))
-      .on("data", function (row) {
-        data.push(row);
+      .on("data", async function (row) {
+        try {
+          const userId = row[0].toString();
+          const timestamp = new Date(row[1]);
+          const messageBody = row[2];
+
+          // Find or create the user based on userID
+          let user = await User.findOne({ userID: userId });
+
+          if (!user) {
+            user = new User({ userID: userId });
+            await user.save();
+          }
+
+          // Create the message data
+          const messageData = {
+            text: messageBody,
+            sender: user._id, // Use the ObjectId of the found or created user
+            conversation: mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
+            timestamp: timestamp,
+            status: 'unassigned',
+          };
+
+          data.push(messageData);
+        } catch (error) {
+          console.error("Error processing CSV row:", error);
+          reject(error);
+        }
       })
       .on("error", function (error) {
         console.log(error.message);
@@ -46,15 +73,9 @@ const seedMessages = async () => {
       })
       .on("end", async function () {
         try {
-          const messages = data.map((row) => ({
-            customer_name: row[0].toString(),
-            message: row[2],
-            timestamp: new Date(row[1]),
-          }));
-
-          await Message.insertMany(messages);
+          await Message.insertMany(data);
           console.log("CSV data saved to MongoDB");
-          resolve(messages);
+          resolve(data);
         } catch (error) {
           console.error("Error saving CSV data to MongoDB:", error);
           reject(error);
