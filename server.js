@@ -33,26 +33,18 @@ mongoose.connect('mongodb://localhost:27017/messaging', { useNewUrlParser: true,
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 // CSV Parsing and Saving to MongoDB
-const seedUsers = async () => {
+const seedMessages = async () => {
   const data = [];
 
   return new Promise((resolve, reject) => {
-    // ... (existing code)
-
     fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
       .pipe(parse({ delimiter: ",", from_line: 2 }))
       .on("data", async function (row) {
         try {
-          // ... (existing code)
+          // Properly define userId within the scope of the callback function
+          const userId = row[0].toString();
 
-          // Create the user data
-          const userData = {
-            userID: userId,
-            timestamp: timestamp,
-            messageBody: messageBody,
-          };
-
-          data.push(userData);
+          // Rest of your code...
         } catch (error) {
           console.error("Error processing CSV row:", error);
           reject(error);
@@ -64,10 +56,8 @@ const seedUsers = async () => {
       })
       .on("end", async function () {
         try {
-          // Insert users into the 'users' collection
-          const users = await User.create(data);
-          console.log("CSV data saved to MongoDB");
-          resolve(users);
+          // Rest of your code...
+          resolve(data);
         } catch (error) {
           console.error("Error saving CSV data to MongoDB:", error);
           reject(error);
@@ -75,9 +65,6 @@ const seedUsers = async () => {
       });
   });
 };
-
-// Call the seedUsers function to insert user data
-seedUsers();
 
 // Socket.io connection
 // ... (existing code)
