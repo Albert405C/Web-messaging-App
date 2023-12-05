@@ -3,7 +3,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const socket = io('http://localhost:3000', {
+const socket = io('http://localhost:3001', {
   withCredentials: true,
   extraHeaders: {
     "my-custom-header": "some-value"
@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages')
+    axios.get('http://localhost:/messages')
       .then(response => {
         setMessages(response.data);
         setLoading(false);
@@ -36,9 +36,9 @@ function App() {
 
     // Listen for 'seededMessages' events from the server
     socket.on('seededMessages', (seededMessages) => {
+      console.log('Received seededMessages:', seededMessages);
       setMessages(seededMessages);
     });
-
     // Listen for 'messageAssigned' events from the server
     socket.on('messageAssigned', ({ messageId, agentId }) => {
       // Update the UI to reflect the assigned message
