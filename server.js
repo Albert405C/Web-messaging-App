@@ -32,57 +32,35 @@ mongoose.connect('mongodb://localhost:27017/messaging_app', { useNewUrlParser: t
   .catch(err => console.error('Could not connect to MongoDB', err));
 
 // CSV Parsing and Saving to MongoDB
+const fs = require('fs');
+const csv = require('csv-parser');
+
 const seedMessages = async () => {
-  const data = [];
+  const messages = [];
 
-  return new Promise((resolve, reject) => {
-    fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
-      .pipe(parse({ delimiter: ",", from_line: 2 }))
-      .on("data", async function (row) {
-        try {
-          const userId = row[0].toString();
-          const timestamp = new Date(row[1]);
-          const messageBody = row[2];
-
-          // Find or create the user based on userID
-          let user = await User.findOne({ userID: userId });
-
-          if (!user) {
-            user = new User({ userID: userId });
-            await user.save();
-          }
-
-          // Create the message data
-          const messageData = {
-            text: messageBody,
-            sender: new mongoose.Types.ObjectId(user._id), // Use the ObjectId of the found or created user
-            conversation: new mongoose.Types.ObjectId(), // You might want to replace this with a real conversation ID
-            timestamp: new Date(),
-            status: 'unassigned',
-        };
-        
-          data.push(messageData);
-        } catch (error) {
-          console.error("Error processing CSV row:", error);
-          reject(error);
-        }
-      })
-      .on("error", function (error) {
-        console.log(error.message);
-        reject(error);
-      })
-      .on("end", async function () {
-        try {
-          await Message.insertMany(data);
-          console.log("CSV data saved to MongoDB");
-          resolve(data);
-        } catch (error) {
-          console.error("Error saving CSV data to MongoDB:", error);
-          reject(error);
-        }
+  // Read the CSV file
+  fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
+    .pipe(csv({ separator: '\t' })) // Adjust the separator based on your CSV file
+    .on('data', (row) => {
+      // Process each row from the CSV file
+      const newMessage = new Message({
+        sender: `User ${row['User ID']}`,
+        content: `${row['Timestamp (UTC)']} - ${row['Message Body']}`,
       });
-  });
+      messages.push(newMessage);
+    })
+    .on('end', async () => {
+      // Save all messages to the database
+      for (const message of messages) {
+        await message.save();
+      }
+    });
 };
+
+seedMessages();
+
+// ... (rest of your code)
+
 
 // Socket.io connection
 io.on('connection', (socket) => {
