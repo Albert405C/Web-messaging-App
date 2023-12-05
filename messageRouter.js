@@ -1,7 +1,6 @@
 // messageRouter.js
 
 const express = require('express');
-const  Message  = require("C:\\Users\\ADMIN\\OneDrive\\Desktop\\Messaging Web App\\messageModel.js");
 const router = express.Router();
 
 // GET all messages
