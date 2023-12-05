@@ -1,13 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// Define the User schema
-const userSchema = new Schema({
-  userID: { type: Number, required: true },
-  
-});
-
-const User = mongoose.model('User', userSchema);
 
 // Define the Message schema
 const messageSchema = new Schema({
