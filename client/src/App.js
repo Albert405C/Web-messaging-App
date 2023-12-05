@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     // Fetch initial messages from the server
-    axios.get('http://localhost:3000/messages_app')
+    axios.get('http://localhost:3000/messages')
       .then(response => {
         setMessages(response.data);
         setLoading(false);

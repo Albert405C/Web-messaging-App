@@ -79,18 +79,18 @@ io.on('connection', (socket) => {
   // Rest of your existing socket.io connection handling code
 });
 
-// Endpoint to fetch messages from the database
+// Endpoint to fetch messages from the "messaging_app" database
 app.get('/messages', async (req, res) => {
   try {
     const messages = await Message.find();
-    // Sort messages based on urgency (this is just an example, adjust as needed)
-    const sortedMessages = messages.sort((a, b) => (a.isUrgent ? -1 : 1));
-    res.json(sortedMessages);
+    // Sort messages or perform any other processing as needed
+    res.json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 // Use the routes from messageRouter
 app.use('/', messageRouter);
 server.listen(PORT, () => {

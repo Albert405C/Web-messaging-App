@@ -9,7 +9,7 @@ const messageSchema = new Schema({
  status: { type: String, default: 'unassigned' }, 
 });
 
-const Message = mongoose.model('Message', messageSchema);
+const Message = mongoose.model('Message', messageSchema , 'messages');
 
 // Define a function that takes 'socket' and 'io' as parameters
 const initializeSocketListener = (socket, io) => {
