@@ -37,13 +37,13 @@ const seedUsers = async () => {
   const data = [];
 
   return new Promise((resolve, reject) => {
+    // ... (existing code)
+
     fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
       .pipe(parse({ delimiter: ",", from_line: 2 }))
       .on("data", async function (row) {
         try {
-          const userId = row[0].toString();
-          const timestamp = new Date(row[1]);
-          const messageBody = row[2];
+          // ... (existing code)
 
           // Create the user data
           const userData = {
@@ -65,9 +65,9 @@ const seedUsers = async () => {
       .on("end", async function () {
         try {
           // Insert users into the 'users' collection
-          await User.insertMany(data);
+          const users = await User.create(data);
           console.log("CSV data saved to MongoDB");
-          resolve(data);
+          resolve(users);
         } catch (error) {
           console.error("Error saving CSV data to MongoDB:", error);
           reject(error);
