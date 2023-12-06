@@ -15,12 +15,6 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const Message = require('./messageModel.js');
-router.get('/messages', messageController.getMessages);
-router.get('/messages/:id', messageController.getMessage);
-router.post('/messages', messageController.createMessage);
-router.put('/messages/:id', messageController.updateMessage);
-router.delete('/messages/:id', messageController.deleteMessage);
-
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3001',
@@ -33,8 +27,6 @@ const io = socketIo(server, {
 app.use(cors({ origin: 'http://localhost:3001' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/', messageRouter);
-
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/messaging', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -102,8 +94,8 @@ io.on('connection', (socket) => {
 });
 
 
+app.use('/', messageRouter);
 
-module.exports = app;
 
 
 server.listen(PORT, () => {
