@@ -23,7 +23,7 @@ const io = socketIo(server, {
 });
 
 // Middleware
-app.use(cors({ origin: 'http://localhost:3000' }));
+app.use(cors({ origin: 'http://localhost:3001' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -34,37 +34,16 @@ mongoose.connect('mongodb://localhost:27017/messaging', { useNewUrlParser: true,
 
 // CSV Parsing and Saving to MongoDB
 const seedMessages = async () => {
-  const data = [];
-
-  return new Promise((resolve, reject) => {
-    fs.createReadStream("C:\\Users\\ADMIN\\OneDrive\\Desktop\\messages.csv")
-      .pipe(parse({ delimiter: ",", from_line: 2 }))
-      .on("data", async function (row) {
-        try {
-          // Properly define userId within the scope of the callback function
-          const userId = row[0].toString();
-
-          // Rest of your code...
-        } catch (error) {
-          console.error("Error processing CSV row:", error);
-          reject(error);
-        }
-      })
-      .on("error", function (error) {
-        console.log(error.message);
-        reject(error);
-      })
-      .on("end", async function () {
-        try {
-          // Rest of your code...
-          resolve(data);
-        } catch (error) {
-          console.error("Error saving CSV data to MongoDB:", error);
-          reject(error);
-        }
-      });
-  });
+  for (let i = 1; i <= 50; i++) {
+    const newMessage = new Message({
+      sender: `Customer ${i}`,
+      content: `This is message number ${i}`,
+    });
+    await newMessage.save();
+  }
 };
+
+seedMessages();
 
 // Socket.io connection
 // ... (existing code)
@@ -89,15 +68,19 @@ io.on('connection', (socket) => {
 });
 
 
-app.get('/messages', async (req, res) => {
-  try {
-     const messages = await Message.find(); // Use await to properly handle the async call
-     res.json(messages);
-  } catch (error) {
-     console.error(error);
-     res.status(500).send('Failed to fetch messages');
-  }
- });
+app.post('/messages', async (req, res) => {
+  const { sender, content } = req.body;
+  const newMessage = new Message({ sender, content });
+  await newMessage.save();
+
+  io.emit('newMessage', newMessage);
+
+  res.status(201).json(newMessage);
+});
+
+server.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 app.use('/', messageRouter);
 server.listen(PORT, () => {
