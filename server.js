@@ -89,19 +89,15 @@ io.on('connection', (socket) => {
 });
 
 
-// Endpoint to fetch messages from the "messaging" database
-// Endpoint to fetch messages from the "messaging_app" database
 app.get('/messages', async (req, res) => {
   try {
-    const messages = await Message.find(); // Fetch messages from the "users" collection
-    // Sort messages or perform any other processing as needed
-    res.json(messages);
+     const messages = await Message.find(); // Use await to properly handle the async call
+     res.json(messages);
   } catch (error) {
-    console.error('Error fetching messages:', error);
-    res.status(500).json({ error: 'Internal server error' });
+     console.error(error);
+     res.status(500).send('Failed to fetch messages');
   }
-});
-
+ });
 
 app.use('/', messageRouter);
 server.listen(PORT, () => {
