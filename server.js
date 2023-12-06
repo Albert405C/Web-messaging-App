@@ -15,6 +15,12 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
 const Message = require('./messageModel.js');
+router.get('/messages', messageController.getMessages);
+router.get('/messages/:id', messageController.getMessage);
+router.post('/messages', messageController.createMessage);
+router.put('/messages/:id', messageController.updateMessage);
+router.delete('/messages/:id', messageController.deleteMessage);
+
 const io = socketIo(server, {
   cors: {
     origin: 'http://localhost:3001',
@@ -27,6 +33,8 @@ const io = socketIo(server, {
 app.use(cors({ origin: 'http://localhost:3001' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/', messageRouter);
+
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/messaging', { useNewUrlParser: true, useUnifiedTopology: true })
@@ -93,28 +101,10 @@ io.on('connection', (socket) => {
   // ... (existing code)
 });
 
-app.get('/messages', async (req, res) => {
-  try {
-    const messages = await Message.find();
-    res.json(messages);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Failed to fetch messages');
-  }
-});
 
-app.use('/', messageRouter);
 
-// Endpoint to seed messages from CSV to MongoDB
-app.post('/seed-messages', async (req, res) => {
-  try {
-    const seededMessages = await seedMessages();
-    res.json(seededMessages);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Failed to seed messages');
-  }
-});
+
+
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
