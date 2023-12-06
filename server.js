@@ -82,12 +82,12 @@ io.on('connection', (socket) => {
 
   // Listen for 'messageAdded' event from the client
   socket.on('newMessage', (newMessage) => {
-    // ... (existing code)
-    io.emit('messageAdded', newMessage);
+    io.emit('messageAdded', newMessage); // Broadcast the new message to all clients
   });
 
   // ... (existing code)
 });
+
 
 // Endpoint to fetch messages from the "messaging" database
 // Endpoint to fetch messages from the "messaging_app" database

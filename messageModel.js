@@ -4,12 +4,11 @@ const { Schema } = mongoose;
 
 // Define the Message schema
 const messageSchema = new Schema({
-  text: { type: String, required: true },
-  // sender: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // Commented out or removed
+  userId: { type: String, required: true },
+  messageBody: { type: String, required: true },
   timestamp: { type: Date, default: Date.now },
   status: { type: String, default: 'unassigned' },
 });
-
 
 const Message = mongoose.model('Message', messageSchema, 'messages');
 

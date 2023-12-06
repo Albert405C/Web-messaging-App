@@ -1,7 +1,7 @@
 // messageRouter.js
-
 const express = require('express');
 const router = express.Router();
+const { Message } = require('./messageModel'); // Adjust the path accordingly
 
 // GET all messages
 router.get('/messages', async (req, res) => {
@@ -14,29 +14,18 @@ router.get('/messages', async (req, res) => {
 });
 
 // POST a new customer message
-router.post('/customer/messages', async (req, res) => {
-  const customerMessage = new Message({
-    text: req.body.text,
-    timestamp: new Date(),
-    status: 'unassigned',
+router.post('/messages', async (req, res) => {
+  const { userId, messageBody } = req.body;
+
+  const newMessage = new Message({
+    userId,
+    messageBody,
   });
 
   try {
-    const savedMessage = await customerMessage.save();
-    io.emit('messageAdded', savedMessage);
+    const savedMessage = await newMessage.save();
+    io.emit('messageAdded', savedMessage); // Emit event to notify clients about the new message
     res.json(savedMessage);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// PUT a new response to a message
-router.put('/messages/:id', async (req, res) => {
-  try {
-    const message = await Message.findById(req.params.id);
-    message.response = req.body.response;
-    await message.save();
-    res.json(message);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -55,7 +55,7 @@ function App() {
     e.preventDefault();
 
     // Emit 'newMessage' event to the server
-    socket.emit('newMessage', { ...newMessage }, (response) => {
+    socket.emit('newMessage', { userId: newMessage.userId, messageBody: newMessage.messageBody }, (response) => {
       // Handle the acknowledgment from the server (if needed)
       console.log(response);
     });
@@ -66,63 +66,39 @@ function App() {
 
   return (
     <div className="container mt-4">
-      <h1 className="mb-4">Branch Messaging App</h1>
-      <div className="row">
-        <div className="col-md-8">
-          {loading ? (
-            <p>Loading messages...</p>
-          ) : error ? (
-            <p>{error}</p>
-          ) : (
-            <ul className="list-group">
-              {messages.map(message => (
-                <li key={message._id} className={`list-group-item ${message.isUrgent ? 'urgent-message' : ''}`}>
-                  <strong>{message.userId}:</strong> {message.messageBody}
-                  {message.agentId ? (
-                    <span className="assigned-message">Assigned to Agent {message.agentId}</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
+      {/* ... (existing code) */}
+      <form onSubmit={handleSubmit}>
+        <div className="mb-3">
+          <label htmlFor="userId" className="form-label">
+            User ID:
+            <input
+              type="text"
+              className="form-control"
+              id="userId"
+              name="userId"
+              value={newMessage.userId}
+              onChange={handleInputChange}
+            />
+          </label>
         </div>
-        <div className="col-md-4">
-          {/* Form for sending new messages */}
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="userId" className="form-label">
-                User ID:
-                <input
-                  type="text"
-                  className="form-control"
-                  id="userId"
-                  name="userId"
-                  value={newMessage.userId}
-                  onChange={handleInputChange}
-                />
-              </label>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="messageBody" className="form-label">
-                Message Body:
-                <input
-                  type="text"
-                  className="form-control"
-                  id="messageBody"
-                  name="messageBody"
-                  value={newMessage.messageBody}
-                  onChange={handleInputChange}
-                />
-              </label>
-            </div>
-            <button type="submit" className="btn btn-primary">
-              Send Message
-            </button>
-          </form>
+        <div className="mb-3">
+          <label htmlFor="messageBody" className="form-label">
+            Message Body:
+            <input
+              type="text"
+              className="form-control"
+              id="messageBody"
+              name="messageBody"
+              value={newMessage.messageBody}
+              onChange={handleInputChange}
+            />
+          </label>
         </div>
-      </div>
+        <button type="submit" className="btn btn-primary">
+          Send Message
+        </button>
+      </form>
     </div>
   );
 }
-
 export default App;
