@@ -79,9 +79,6 @@ app.post('/messages', async (req, res) => {
   res.status(201).json(newMessage);
 });
 
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
 
 app.use('/', messageRouter);
 server.listen(PORT, () => {
