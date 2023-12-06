@@ -1,15 +1,16 @@
+// server.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const http = require('http');
 const socketIo = require('socket.io');
+const fs = require('fs');
 const { parse } = require("csv-parse");
 
-
-const fs = require('fs');
-const csvParser = require('csv-parser');
 const cors = require('cors');
 const messageRouter = require('./messageRouter.js');
+
 const PORT = process.env.PORT || 3000;
 const app = express();
 const server = http.createServer(app);
@@ -41,10 +42,16 @@ const seedMessages = async () => {
       .pipe(parse({ delimiter: ",", from_line: 2 }))
       .on("data", async function (row) {
         try {
-          // Properly define userId within the scope of the callback function
           const userId = row[0].toString();
+          const messageBody = row[1].toString(); // Assuming the second column contains messageBody
 
-          // Rest of your code...
+          const newMessage = new Message({
+            userId,
+            messageBody,
+          });
+
+          const savedMessage = await newMessage.save();
+          data.push(savedMessage);
         } catch (error) {
           console.error("Error processing CSV row:", error);
           reject(error);
@@ -56,7 +63,7 @@ const seedMessages = async () => {
       })
       .on("end", async function () {
         try {
-          // Rest of your code...
+          io.emit('seededMessages', data); // Emit event to notify clients about seeded messages
           resolve(data);
         } catch (error) {
           console.error("Error saving CSV data to MongoDB:", error);
@@ -67,39 +74,48 @@ const seedMessages = async () => {
 };
 
 // Socket.io connection
-// ... (existing code)
-
-// Endpoint to fetch users from the "messaging_app" database
-
-
-// ... (existing code)
-
-// Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
 
   // ... (existing code)
 
   // Listen for 'messageAdded' event from the client
-  socket.on('newMessage', (newMessage) => {
-    io.emit('messageAdded', newMessage); // Broadcast the new message to all clients
+  socket.on('newMessage', async (newMessage) => {
+    try {
+      const message = new Message(newMessage);
+      const savedMessage = await message.save();
+      io.emit('messageAdded', savedMessage); // Broadcast the new message to all clients
+    } catch (error) {
+      console.error("Error saving new message to MongoDB:", error);
+    }
   });
 
   // ... (existing code)
 });
 
-
 app.get('/messages', async (req, res) => {
   try {
-     const messages = await Message.find(); // Use await to properly handle the async call
-     res.json(messages);
+    const messages = await Message.find();
+    res.json(messages);
   } catch (error) {
-     console.error(error);
-     res.status(500).send('Failed to fetch messages');
+    console.error(error);
+    res.status(500).send('Failed to fetch messages');
   }
- });
+});
 
 app.use('/', messageRouter);
+
+// Endpoint to seed messages from CSV to MongoDB
+app.post('/seed-messages', async (req, res) => {
+  try {
+    const seededMessages = await seedMessages();
+    res.json(seededMessages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Failed to seed messages');
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

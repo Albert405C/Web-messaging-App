@@ -1,22 +1,24 @@
+// App.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const socket = io('http://localhost:3000', {
- withCredentials: true,
- extraHeaders: {
+  withCredentials: true,
+  extraHeaders: {
     "my-custom-header": "some-value"
- }
+  }
 });
 
 function App() {
- const [messages, setMessages] = useState([]);
- const [newMessage, setNewMessage] = useState({ userId: '', messageBody: '' });
- const [loading, setLoading] = useState(true);
- const [error, setError] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState({ userId: '', messageBody: '' });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
- useEffect(() => {
+  useEffect(() => {
     // Fetch initial messages from the server
     axios.get('http://localhost:3000/messages')
       .then(response => {
@@ -44,14 +46,14 @@ function App() {
       // Disconnect the socket when the component unmounts
       socket.disconnect();
     };
- }, []);
+  }, []);
 
- const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewMessage(prevMessage => ({ ...prevMessage, [name]: value }));
- };
+  };
 
- const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     // Emit 'newMessage' event to the server
@@ -62,43 +64,30 @@ function App() {
 
     // Clear the form
     setNewMessage({ userId: '', messageBody: '' });
- };
+  };
 
- return (
+  const handleSeedMessages = () => {
+    // Seed messages from CSV to MongoDB
+    axios.post('http://localhost:3000/seed-messages')
+      .then(response => {
+        console.log('Seeded messages:', response.data);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  };
+
+  return (
     <div className="container mt-4">
       {/* ... (existing code) */}
+      <button className="btn btn-primary" onClick={handleSeedMessages}>
+        Seed Messages
+      </button>
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="userId" className="form-label">
-            User ID:
-            <input
-              type="text"
-              className="form-control"
-              id="userId"
-              name="userId"
-              value={newMessage.userId}
-              onChange={handleInputChange}
-            />
-          </label>
-        </div>
-        <div className="mb-3">
-          <label htmlFor="messageBody" className="form-label">
-            Message Body:
-            <input
-              type="text"
-              className="form-control"
-              id="messageBody"
-              name="messageBody"
-              value={newMessage.messageBody}
-              onChange={handleInputChange}
-            />
-          </label>
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Send Message
-        </button>
+        {/* ... (existing code) */}
       </form>
     </div>
- );
+  );
 }
+
 export default App;
