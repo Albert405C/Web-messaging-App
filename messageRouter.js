@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { Message } = require('./messageModel'); // Adjust the path accordingly
-
+const app = require('./server.js');
 app.get('/messages', async (req, res) => {
   try {
      const messages = await Message.find();
