@@ -4,19 +4,19 @@ import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const socket = io('http://localhost:3000', {
-  withCredentials: true,
-  extraHeaders: {
+ withCredentials: true,
+ extraHeaders: {
     "my-custom-header": "some-value"
-  }
+ }
 });
 
 function App() {
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState({ userId: '', messageBody: '' });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+ const [messages, setMessages] = useState([]);
+ const [newMessage, setNewMessage] = useState({ userId: '', messageBody: '' });
+ const [loading, setLoading] = useState(true);
+ const [error, setError] = useState(null);
 
-  useEffect(() => {
+ useEffect(() => {
     // Fetch initial messages from the server
     axios.get('http://localhost:3000/messages')
       .then(response => {
@@ -44,14 +44,14 @@ function App() {
       // Disconnect the socket when the component unmounts
       socket.disconnect();
     };
-  }, []);
+ }, []);
 
-  const handleInputChange = (e) => {
+ const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewMessage(prevMessage => ({ ...prevMessage, [name]: value }));
-  };
+ };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = (e) => {
     e.preventDefault();
 
     // Emit 'newMessage' event to the server
@@ -62,9 +62,9 @@ function App() {
 
     // Clear the form
     setNewMessage({ userId: '', messageBody: '' });
-  };
+ };
 
-  return (
+ return (
     <div className="container mt-4">
       {/* ... (existing code) */}
       <form onSubmit={handleSubmit}>
@@ -99,6 +99,6 @@ function App() {
         </button>
       </form>
     </div>
-  );
+ );
 }
 export default App;
